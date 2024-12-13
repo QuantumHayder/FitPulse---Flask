@@ -28,6 +28,9 @@ class BaseUser(UserMixin):
     def set_password(self, password: str) -> None:
         self._password = generate_password_hash(password)
 
+    def get_id(self) -> str:
+        return str(self.id) + "-" + self.role
+
     @classmethod
     def get(cls, id: int) -> Optional[Self]:
         users = db.fetch_query(

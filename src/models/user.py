@@ -1,4 +1,4 @@
-from .BaseUser import BaseUser
+from .base_user import BaseUser
 
 
 class User(BaseUser):

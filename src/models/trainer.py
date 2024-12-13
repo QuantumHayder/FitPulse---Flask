@@ -1,4 +1,4 @@
-from .BaseUser import BaseUser, UserRole
+from .base_user import BaseUser, UserRole
 
 
 class Trainer(BaseUser):

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from 'components/buttons.html' import primary_button, secondary_button %}
+
+{% block title %} FitPulse | Onboarding {% endblock title %}
+
+{% block body %}
+<div class="min-h-max min-w-screen flex flex-col">
+    <div class="text-center text-3xl text-purple-500">Do you want to be a Client or a Trainer?</div>
+
+    <div class="w-1/2 my-10 flex flex-row justify-evenly mx-auto">
+        <form method="POST" action="{{ url_for('base.trainer_request')}}">
+            <button
+            class="px-5 py-3 inline-flex text-sm font-medium text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg hover:from-violet-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+            type="submit">
+            Trainer
+            </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('base.client_request')}}">
+            <button
+            class="px-5 py-3 inline-flex text-sm font-medium text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg hover:from-violet-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+            type="submit">
+            Client
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock body %}

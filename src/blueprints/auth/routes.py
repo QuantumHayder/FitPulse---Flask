@@ -10,6 +10,10 @@ from flask_login import (
 from werkzeug.security import check_password_hash
 
 from src.models.user import User
+from src.models.admin import Admin
+from src.models.client import Client
+from src.models.trainer import Trainer
+from src.models.base_user import UserRole
 
 
 auth_bp = Blueprint("auth", __name__)
@@ -20,7 +24,24 @@ login_manager.login_view = "auth.login"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    user_id, user_type = user_id.split("-")
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return None
+
+    match user_type:
+        case UserRole.User:
+            return User.get(user_id)
+        case UserRole.Client:
+            return Client.get(user_id)
+        case UserRole.Trainer:
+            return Trainer.get(user_id)
+        case UserRole.Admin:
+            return Admin.get(user_id)
+        case _:
+            return None
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -34,9 +55,27 @@ def login():
         remember = True if request.form.get("remember") else False
 
         user = User.get_by_email(email)
+        client = Client.get_by_email(email)
+        admin = Admin.get_by_email(email)
+        trainer = Trainer.get_by_email(email)
+
+        if not any((user, client, admin, trainer)):
+            flash("Invalid email or password")
+            return redirect(url_for("auth.login"))
+
+        valid_user = None
 
         if user and check_password_hash(user._password, password):
-            login_user(user, remember=remember)
+            valid_user = user
+        elif client and check_password_hash(client._password, password):
+            valid_user = client
+        elif trainer and check_password_hash(trainer._password, password):
+            valid_user = trainer
+        elif admin and check_password_hash(admin._password, password):
+            valid_user = admin
+
+        if valid_user is not None:
+            login_user(valid_user, remember=remember)
             next_page = request.args.get("next")
             return redirect(next_page or url_for("base.home"))
 
@@ -71,7 +110,12 @@ def register():
             return render_template("auth/register.html", **form_data)
 
         user = User.get_by_email(email=email)
-        if user:
+
+        admin = Admin.get_by_email(email=email)
+        trainer = Trainer.get_by_email(email=email)
+        client = Client.get_by_email(email=email)
+
+        if any((user, admin, trainer, client)):
             flash("Email address already exists")
             return render_template("auth/register.html", **form_data)
 

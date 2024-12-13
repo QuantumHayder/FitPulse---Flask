@@ -16,7 +16,7 @@ class Exercise:
         *args,
         **kwargs,
     ) -> None:
-        self._id = kwargs.get("id")
+        self.id = kwargs.get("id")
         self.title = title
         self.description = description
         self.type = type
@@ -75,7 +75,7 @@ class Exercise:
         level: Optional[Level] = None,
     ):
         values = (title, type, body_part, equipment, level)
-        if all(value is None for value in values):
+        if all(not bool(value) for value in values):
             return Exercise.get_all()
 
         query = 'SELECT * FROM public."Exercise" WHERE '
@@ -112,4 +112,4 @@ class Exercise:
         db.execute_query('DELETE FROM public."Exercise" WHERE id = %s;', (id,))
 
     def __str__(self):
-        return f"Exercise(id={self._id}, title={self.title}, type={self.type}, body_part={self.body_part}, level={self.level}, equipment={self.equipment})"
+        return f"Exercise(id={self.id}, title={self.title}, type={self.type}, body_part={self.body_part}, level={self.level}, equipment={self.equipment})"

@@ -24,7 +24,8 @@
 
         <div class="hidden lg:flex lg:items-center lg:space-x-1">
             <nav class="flex items-center space-x-1 mr-6">
-                {% for item in [('base.home', 'Home'), ('base.workouts', 'Workouts'), ('base.nutrition', 'Nutrition'), ('base.community', 'Community')] %}
+            {% if not current_user.is_authenticated or (current_user.is_authenticated and current_user.role != "User")%}
+                {% for item in [('base.home', 'Home'), ('base.exercises', 'Exercises'), ('base.nutrition', 'Nutrition'), ('base.community', 'Community')] %}
                 <a href="{{ url_for(item[0]) }}" 
                    class="relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 group
                           {% if request.endpoint == item[0] %}
@@ -39,6 +40,19 @@
                 </a>
                 {% endfor %}
             </nav>
+            {% endif %}
+
+            {% if current_user.is_authenticated and current_user.role == "User" %}
+              <a href="{{ url_for('base.onboarding') }}" 
+                   class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                          {% if request.endpoint == 'base.onboarding' %}
+                          text-violet-600 bg-violet-50
+                          {% else %}
+                          text-gray-600 hover:text-gray-900 hover:bg-gray-50
+                          {% endif %}">
+                    Onboarding
+                </a>
+            {% endif %}
             
             
             {% if current_user.is_authenticated %}
@@ -99,7 +113,7 @@
 
         <div id="mobile-menu" class="hidden w-full lg:hidden mt-4">
             <div class="flex flex-col space-y-1 pb-3 pt-2">
-                {% for item in [('base.home', 'Home'), ('base.workouts', 'Workouts'), ('base.nutrition', 'Nutrition'), ('base.community', 'Community'), ('auth.login', 'Login')] %}
+                {% for item in [('base.home', 'Home'), ('base.exercises', 'Exercises'), ('base.nutrition', 'Nutrition'), ('base.community', 'Community'), ('auth.login', 'Login')] %}
                 <a href="{{ url_for(item[0]) }}" 
                    class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
                           {% if request.endpoint == item[0] %}

@@ -1,17 +1,123 @@
-from flask import Blueprint, request, redirect, url_for, render_template, flash
-from flask_login import login_required
+from flask import (
+    Blueprint,
+    request,
+    redirect,
+    url_for,
+    render_template,
+    flash,
+    Response,
+)
+from flask_login import login_required, current_user, logout_user, login_user
+from flask_htmx import HTMX
+
+from src.models.client import Client
+from src.models.base_user import UserRole
+from src.models.user import User
+from src.models.exercise import Exercise
+from src.models.exercise_enums import ExerciseType, Level, Equipment, BodyPart
+
 
 base_bp = Blueprint("base", __name__)
+htmx = HTMX(base_bp)
+
+
+@base_bp.route("/client-request", methods=["POST"])
+@login_required
+def client_request():
+    if current_user.role == UserRole.User:
+        c = Client(
+            email=current_user.email,
+            first_name=current_user.first_name,
+            last_name=current_user.last_name,
+            password=current_user._password,
+        )
+        Client.insert(c)
+        User.delete(current_user.id)
+        logout_user()
+        c = Client.get_by_email(c.email)
+        login_user(c)
+        return redirect(url_for("base.home"))
+
+    return Response("Bad Request", 400)
+
+
+@base_bp.route("/trainer-request", methods=["POST"])
+@login_required
+def trainer_request():
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.home"))
+
+    return Response("Bad Request", 400)
 
 
 @base_bp.route("/")
 def home():
+    if current_user.is_authenticated and current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding"))
+
     return render_template("home.html")
 
 
-@base_bp.route("/workouts")
-def workouts():
-    return render_template("workouts.html")
+@base_bp.route("/onboarding")
+@login_required
+def onboarding():
+    if current_user.role != UserRole.User:
+        return redirect(url_for("base.home"))
+
+    return render_template("onboarding.html")
+
+
+@base_bp.route("/exercises")
+@login_required
+def exercises():
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding"))
+
+    return render_template(
+        "exercises.html",
+        levels=Level,
+        exercise_types=ExerciseType,
+        body_parts=BodyPart,
+        equipment_types=Equipment,
+    )
+
+
+@base_bp.route("/exercise-search")
+@login_required
+def exercise_search():
+    if not htmx:
+        return Response("Bad Request", status=201)
+
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding"))
+
+    title = request.args.get("title")
+    exercise_type = request.args.get("type")
+    body_part = request.args.get("body_part")
+    equipment = request.args.get("equipment")
+    level = request.args.get("level")
+
+    exercises = Exercise.search(title, exercise_type, body_part, equipment, level)
+
+    return render_template("partials/exercise_table.html", exercises=exercises)
+
+
+@base_bp.route("/exercises/<int:exercise_id>")
+@login_required
+def show_exercise(exercise_id):
+
+    if not htmx:
+        return Response("Bad Request", status=201)
+
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding"))
+
+    exercise = Exercise.get(exercise_id)
+
+    if exercise is None:
+        return Response("Bad Request", status=201)
+
+    return render_template("partials/show_exercise.html", exercise=exercise)
 
 
 @base_bp.route("/nutrition")
