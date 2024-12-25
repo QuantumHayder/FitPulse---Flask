@@ -1,9 +1,4 @@
 
-Entities Left:
-
-1. Achievement - ClientAcheivementMap
-2. Review - ReviewClassMap
-
 ---
 
 Todo:
