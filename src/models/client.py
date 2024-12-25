@@ -12,6 +12,24 @@ class Client(BaseUser):
     def __init__(self, email: str, first_name: str, last_name: str, *args, **kwargs):
         super().__init__(email, first_name, last_name, *args, **kwargs)
 
+    def get_friends(self):
+
+        received = {
+            r.sender
+            for r in FriendRequest.get_all_received(self.id)
+            if r.status == Status.Accepted
+        }
+
+        sent = {
+            r.receiver
+            for r in FriendRequest.get_all_sent(self.id)
+            if r.status == Status.Accepted
+        }
+
+        user_ids = list(sent.union(received))
+
+        return [Client.get(uid) for uid in user_ids]
+
     def reject_friend_request(self, other: Self) -> None:
         other_client = self.get(other.id)
 
@@ -60,8 +78,3 @@ class Client(BaseUser):
         FriendRequest.insert(
             FriendRequest(receiver=other.id, sender=self.id, status=Status.Pending)
         )
-
-
-if __name__ == "__main__":
-    c1 = Client.get(3)
-    c2 = Client.get(10)

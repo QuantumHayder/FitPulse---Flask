@@ -2,13 +2,9 @@
 Entities Left:
 
 1. Achievement - ClientAcheivementMap
-2. FriendRequest
-3. WorkoutRequest
-4. Promotion
-5. Review - ReviewClassMap
-6. WorkoutPlan
-
-
+2. WorkoutRequest
+3. Promotion
+4. Review - ReviewClassMap
 
 ---
 

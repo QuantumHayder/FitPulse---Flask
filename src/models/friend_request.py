@@ -41,10 +41,20 @@ class FriendRequest:
 
         return cls(**requests[0])
 
-    def get_all(self):
+    @classmethod
+    def get_all_sent(cls, sender: int):
         requests = db.fetch_query(
-            'SELECT FROM public."FriendRequest" WHERE "receiver" = %s',
-            (self.id,),
+            'SELECT * FROM public."FriendRequest" WHERE "sender" = %s',
+            (sender,),
+        )
+
+        return [FriendRequest(**request) for request in requests]
+
+    @classmethod
+    def get_all_received(cls, received: int):
+        requests = db.fetch_query(
+            'SELECT * FROM public."FriendRequest" WHERE "receiver" = %s',
+            (received,),
         )
         return [FriendRequest(**request) for request in requests]
 
@@ -72,4 +82,4 @@ class FriendRequest:
         )
 
     def __str__(self):
-        return f"Food(id={self.id}, name={self.name}, calories={self.calories}, carbs={self.carbs}, proteins={self.proteins}, fats={self.fats})"
+        return f"FriendRquest(sender={self.sender}, receiver={self.receiver}, status={self.status})"
