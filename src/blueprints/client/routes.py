@@ -3,11 +3,49 @@ from flask_login import login_required, current_user
 from flask_htmx import HTMX
 
 from src.models.training_class import TrainingClass
-from src.models.user import User
+from src.models.client import Client
 from src.models.base_user import UserRole
 
 client_bp = Blueprint("client", __name__)
 htmx = HTMX(client_bp)
+
+
+@client_bp.route("/accept-friend-request/<int:client_id>/", methods=["POST"])
+@login_required
+def accept_friend_request(client_id):
+    if not htmx:
+        return Response("Bad Request", status=201)
+
+    sender = Client.get(client_id)
+
+    if sender is None:
+        return
+
+    current_user.accept_friend_request(sender)
+
+    return render_template(
+        "components/friend-request-section.html",
+        friend_requests=current_user.get_pending_requests_received(),
+    )
+
+
+@client_bp.route("/reject-friend-request/<int:client_id>/", methods=["POST"])
+@login_required
+def reject_friend_request(client_id):
+    if not htmx:
+        return Response("Bad Request", status=201)
+
+    sender = Client.get(client_id)
+
+    if sender is None:
+        return
+
+    current_user.reject_friend_request(sender)
+
+    return render_template(
+        "components/friend-request-section.html",
+        friend_requests=current_user.get_pending_requests_received(),
+    )
 
 
 @client_bp.route("/training-class-search")
@@ -35,4 +73,8 @@ def training_class_search():
 @client_bp.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding"))
+
+    context = {"friend_requests": current_user.get_pending_requests_received()}
+    return render_template("dashboard.html", **context)

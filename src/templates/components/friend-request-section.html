@@ -1,0 +1,16 @@
+{% if friend_requests %}
+    {% for client in friend_requests %}
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+            <div class="flex items-center space-x-3">
+                <div class="min-w-10 min-h-10 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 flex items-center justify-center text-white font-medium">{{client.first_name[0]|upper}}{{client.last_name[0]|upper}}</div>
+                <span class="text-gray-700">{{ client.first_name }} {{ client.last_name }}</span>
+            </div>
+            <div class="flex gap-10 flex-row">
+                <button class="text-violet-600 hover:text-violet-700" hx-post="{{ url_for('client.reject_friend_request', client_id=client.id)}}" hx-target="#friend-requests" hx-swap="innerHTML">Reject</button>
+                <button class="text-violet-600 hover:text-violet-700" hx-post="{{ url_for('client.accept_friend_request', client_id=client.id)}}" hx-target="#friend-requests" hx-swap="innerHTML">Accept</button>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p class="text-gray-500 text-center justify-center items-centers">You don't have any pending friend requests.</p>
+{% endif %}

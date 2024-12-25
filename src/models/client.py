@@ -3,14 +3,19 @@ from datetime import datetime
 from .base_user import BaseUser, UserRole
 from .trainer_request import Status
 from .friend_request import FriendRequest
-from . import db
 
 
 class Client(BaseUser):
     role: UserRole = UserRole.Client
 
     def __init__(
-        self, email: str, first_name: str, last_name: str, points: int, *args, **kwargs
+        self,
+        email: str,
+        first_name: str,
+        last_name: str,
+        *args,
+        points: int = 0,
+        **kwargs,
     ):
         super().__init__(email, first_name, last_name, *args, **kwargs)
         self.points = points
