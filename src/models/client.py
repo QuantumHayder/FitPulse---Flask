@@ -9,8 +9,11 @@ from . import db
 class Client(BaseUser):
     role: UserRole = UserRole.Client
 
-    def __init__(self, email: str, first_name: str, last_name: str, *args, **kwargs):
+    def __init__(
+        self, email: str, first_name: str, last_name: str, points: int, *args, **kwargs
+    ):
         super().__init__(email, first_name, last_name, *args, **kwargs)
+        self.points = points
 
     def get_friends(self):
 
@@ -27,6 +30,15 @@ class Client(BaseUser):
         }
 
         user_ids = list(sent.union(received))
+
+        return [Client.get(uid) for uid in user_ids]
+
+    def get_pending_requests_received(self):
+        user_ids = [
+            r.sender
+            for r in FriendRequest.get_all_received(self.id)
+            if r.status == Status.Pending
+        ]
 
         return [Client.get(uid) for uid in user_ids]
 
@@ -78,3 +90,6 @@ class Client(BaseUser):
         FriendRequest.insert(
             FriendRequest(receiver=other.id, sender=self.id, status=Status.Pending)
         )
+
+    def __str__(self):
+        return f"Client(id={self.id}, first_name={self.first_name}, last_name={self.last_name}, email={self.email}, points={self.points})"
