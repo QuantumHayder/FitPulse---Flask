@@ -77,6 +77,8 @@ def login():
         if valid_user is not None:
             login_user(valid_user, remember=remember)
             next_page = request.args.get("next")
+            if current_user.role == UserRole.Client:
+                return redirect(next_page or url_for("client.dashboard"))
             return redirect(next_page or url_for("base.home"))
 
         flash("Invalid email or password")

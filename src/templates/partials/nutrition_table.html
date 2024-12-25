@@ -1,0 +1,31 @@
+
+{% if food %}
+<table class="w-full max-w-4xl mx-auto border-collapse bg-white shadow-md rounded-lg overflow-hidden">
+    <thead class="bg-gray-100">
+        <tr>
+            <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Food</th>
+            <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calories</th>
+            <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Protein</th>
+            <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Carbohydrates</th>
+            <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fats</th>
+        </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+        {% for f in food %}
+            <tr class="hover:bg-gray-50 transition duration-200 cursor-pointer"
+            >
+                <td class="p-3 text-sm text-gray-700">{{ f.name|title }}</td>
+                <td class="p-3 text-sm text-gray-700">{{ f.calories }}</td>
+                <td class="p-3 text-sm text-gray-700">{{ f.proteins }}</td>
+                <td class="p-3 text-sm text-gray-700">{{ f.carbs }}</td>
+                <td class="p-3 text-sm text-gray-700">{{ f.fats }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+
+<p class="text-center text-gray-600"> No food for the given search </p>
+
+{% endif %}

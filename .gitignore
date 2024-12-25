@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,flask,virtualenv
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,flask,virtualenv
 
+.DS_Store
+
 ### Flask ###
 instance/*
 !instance/.gitignore

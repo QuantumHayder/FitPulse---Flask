@@ -44,6 +44,12 @@ class BaseUser(UserMixin):
         return cls(**user)
 
     @classmethod
+    def get_all(cls) -> list[Self]:
+        users = db.fetch_query(f'SELECT * FROM public."{cls.__name__}";')
+
+        return [cls(**user) for user in users]
+
+    @classmethod
     def get_password(cls, id: int) -> Optional[str]:
         passwords = db.fetch_query(
             f'SELECT password FROM public."{cls.__name__}" WHERE id = %s',
