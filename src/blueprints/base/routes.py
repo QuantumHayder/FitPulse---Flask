@@ -40,7 +40,7 @@ def client_request():
     logout_user()
     c = Client.get_by_email(c.email)
     login_user(c)
-    return redirect(url_for("base.dashboard"))
+    return redirect(url_for("client.dashboard"))
 
 
 @base_bp.route("/trainer-request", methods=["POST"])

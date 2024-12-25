@@ -15,11 +15,11 @@ Entities Left:
 Todo:
 
 1. Add points to client
-2. CSRF Validation
-3. Validating next param
-4. Adding reps to ExerciseLogMap
-5. Adding amount (g) to FoodLogMap
-6. Adding Cascade logic to database
+2. Adding reps to ExerciseLogMap
+3. Adding amount (g) to FoodLogMap
+4. Adding Cascade logic to database
+5. CSRF Validation
+6. Validating next param
 7. Settings
 8. Mobile Menu
 

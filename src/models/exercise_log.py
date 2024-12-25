@@ -87,5 +87,4 @@ class ExerciseLog:
 if __name__ == "__main__":
     log_entry, exercises = ExerciseLog.get(2)
     for exercise in exercises:
-
         print(exercise)
