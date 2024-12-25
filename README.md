@@ -8,13 +8,11 @@ Entities Left:
 
 Todo:
 
-1. Adding reps to ExerciseLogMap
-2. Adding amount (g) to FoodLogMap
-3. CSRF Validation
-4. Validating next param
-5. Settings
-6. Passoword
-7. Mobile Menu
+1. CSRF Validation
+2. Validating next param
+3. Settings
+4. Change Password
+5. Mobile Menu
 
 
 ----

@@ -26,14 +26,35 @@ class FoodLog:
 
         return [Food(**f) for f in food]
 
-    def insert_food(self, food: int) -> None:
+    def insert_food(self, food: int, amount_g:int) -> None:
         f = Food.get(food)
         if not f:
             raise ValueError("Cannot add a non-existent food to log.")
+        
 
         db.execute_query(
-            'INSERT INTO public."LogFoodMap" ("log", "food") VALUES (%s, %s)',
-            (self.id, food),
+            'INSERT INTO public."LogFoodMap" ("log", "food", "amount_g") VALUES (%s, %s, %s)',
+            (self.id, food, amount_g),
+        )
+
+    def update_food(self, food: int, amount_g:int) -> None:
+        f = Food.get(food)
+        if not f:
+            raise ValueError("Cannot update a non-existent food in log.")
+        
+        l=FoodLog.get(self.id)
+        if not l:
+            raise ValueError("cannot update a non existing log in LogFoodMap ")
+        
+        food_log = db.fetch_query(
+            'SELECT * FROM public."LogFoodMap" WHERE log = %s AND food = %s ', (self.id, food)
+        )
+
+        if not food_log:
+            return None
+
+        db.execute_query(
+            'UPDATE public."LogFoodMap" SET amount_g = %s WHERE log = %s AND food = %s', (amount_g, self.id, food)
         )
 
     @classmethod
@@ -84,3 +105,13 @@ class FoodLog:
         return (
             f"FoodLog(id={self.id}, client={self.client}, timestamp={self.timestamp})"
         )
+
+if __name__ == "__main__":
+    log_entry, foods = FoodLog.get(1)
+    for food in foods:
+        print(food)
+    
+    print(log_entry)
+
+
+    log_entry.update_food(100,10)
