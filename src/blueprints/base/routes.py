@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import (
     Blueprint,
     request,
@@ -43,15 +44,29 @@ def client_request():
     return redirect(url_for("client.dashboard"))
 
 
-@base_bp.route("/trainer-request", methods=["POST"])
+@base_bp.route("/trainer-request", methods=["POST", "GET"])
 @login_required
 def trainer_request():
     if current_user.role != UserRole.User:
         return Response("Bad Request", 400)
 
+    if request.method == "POST" and htmx:
+
+        description = request.form.get("description")
+        linked_in = request.form.get("linkedin_url")
+
+        TrainerRequest.insert(
+            TrainerRequest(current_user.id, datetime.now(), description, linked_in)
+        )
+
+        return render_template(
+            "trainer/trainer_requests.html",
+            trainer_requests=TrainerRequest.get_by_user(current_user.id),
+        )
+
     return render_template(
         "trainer/trainer_onboarding.html",
-        trainer_requests=TrainerRequest.get(current_user.id),
+        trainer_requests=TrainerRequest.get_by_user(current_user.id),
     )
 
 

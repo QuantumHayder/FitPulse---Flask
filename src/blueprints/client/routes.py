@@ -24,7 +24,7 @@ def accept_friend_request(client_id):
     current_user.accept_friend_request(sender)
 
     return render_template(
-        "components/friend-request-section.html",
+        "components/friend_request_section.html",
         friend_requests=current_user.get_pending_requests_received(),
     )
 
@@ -43,7 +43,7 @@ def reject_friend_request(client_id):
     current_user.reject_friend_request(sender)
 
     return render_template(
-        "components/friend-request-section.html",
+        "components/friend_request_section.html",
         friend_requests=current_user.get_pending_requests_received(),
     )
 

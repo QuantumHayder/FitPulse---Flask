@@ -2,7 +2,9 @@ from enum import StrEnum
 
 from typing import Self
 
+
 from . import db
+from .user import User
 
 
 class Status(StrEnum):
@@ -22,14 +24,47 @@ class TrainerRequest:
         *args,
         **kwargs,
     ) -> None:
+        self.request_id = kwargs.get("request_id")
         self.user = user
         self.timestamp = timestamp
         self.description = description
         self.linkedin_url = linkedin_url
         self.status = status
 
+    def accept_request(self):
+        db.execute_query(
+            'UPDATE public."TrainerRequest" SET "status" = %s WHERE "request_id" = %s ',
+            (
+                Status.Accepted,
+                self.request_id,
+            ),
+        )
+
+    def reject_request(self):
+        db.execute_query(
+            'UPDATE public."TrainerRequest" SET "status" = %s WHERE "request_id" = %s ',
+            (
+                Status.Rejected,
+                self.request_id,
+            ),
+        )
+
     @classmethod
-    def get(cls, user_id: int):
+    def get(cls, request_id: int):
+        trainer_requests = db.fetch_query(
+            'SELECT * FROM public."TrainerRequest" WHERE "request_id" = %s ',
+            (request_id,),
+        )
+
+        if not trainer_requests:
+            return None
+
+        trainer_request = trainer_requests[0]
+
+        return cls(**trainer_request)
+
+    @classmethod
+    def get_by_user(cls, user_id: int):
         trainer_requests = db.fetch_query(
             'SELECT * FROM public."TrainerRequest" WHERE "user" = %s ', (user_id,)
         )
@@ -37,7 +72,17 @@ class TrainerRequest:
         if not trainer_requests:
             return None
 
+        trainer_requests.sort(key=lambda r: r["timestamp"], reverse=True)
+
         return [cls(**trainer_request) for trainer_request in trainer_requests]
+
+    @classmethod
+    def get_all(cls):
+        requests = db.fetch_query(
+            'SELECT * FROM public."TrainerRequest" as t, public."User" as u WHERE t.user = u.id;'
+        )
+
+        return [(cls(**r), User(**r)) for r in requests]
 
     @classmethod
     def insert(cls, trainer_request: Self) -> None:
@@ -68,24 +113,10 @@ class TrainerRequest:
         )
 
     @classmethod
-    def delete(cls, user_id: int) -> None:
+    def delete(cls, id: int) -> None:
         db.execute_query(
-            'DELETE FROM public."TrainerRequest" WHERE "user" = %s;', (user_id,)
+            'DELETE FROM public."TrainerRequest" WHERE "request_id" = %s;', (id,)
         )
 
     def __str__(self):
-        return f"TrainerRequest(user={self.user}, timestamp={self.timestamp}, linkedin_url={self.linkedin_url}, status={self.status})"
-
-
-if __name__ == "__main__":
-    from datetime import datetime
-
-    r = TrainerRequest(
-        22,
-        datetime.now(),
-        "This is my description",
-        "https://www.linkedin.com/moalkhateeb",
-        Status.Accepted,
-    )
-
-    TrainerRequest.insert(r)
+        return f"TrainerRequest(request_id={self.request_id}, user={self.user}, timestamp={self.timestamp}, linkedin_url={self.linkedin_url}, status={self.status})"

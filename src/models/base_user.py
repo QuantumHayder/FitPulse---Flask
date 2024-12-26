@@ -63,7 +63,7 @@ class BaseUser(UserMixin):
     def update_password(cls, id: int, password: str) -> None:
         db.execute_query(
             f'UPDATE public."{cls.__name__}" SET password = %s WHERE id = %s',
-            (password, id),
+            (generate_password_hash(password), id),
         )
 
     @classmethod

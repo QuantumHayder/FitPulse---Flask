@@ -147,27 +147,36 @@ def update_profile():
     last_name = request.form.get("last_name")
     email = request.form.get("email")
 
-    User.update_user(current_user.id, first_name, last_name, email)
+    if not first_name or not last_name or not email:
+        return '<div class="text-red-500">All fields are required!</div>', 200
 
-    flash("Profile updated successfully")
-    return redirect(url_for("profile"))
+    # TODO: make sure email is not already taken in all user tables
+
+    current_user.update(current_user.id, first_name, last_name, email)
+
+    success_message = (
+        f"<div class='text-green-500'>Information updated successfully!</div>"
+    )
+    return success_message, 200
 
 
 @auth_bp.route("/change-password", methods=["POST"])
 @login_required
 def change_password():
-    old_password = request.form.get("old_password")
+    current_password = request.form.get("current_password")
     new_password = request.form.get("new_password")
 
-    current_user_password = User.get_password(current_user.id)
+    current_user_password = current_user.get_password(current_user.id)
 
-    if check_password_hash(current_user_password, old_password):
-        User.update_password(current_user.id, new_password)
-        flash("Password updated successfully")
-    else:
-        flash("Current password is incorrect")
+    invalid = validate_password(new_password)
+    if invalid:
+        return f'<div class="text-red-500">{invalid}</div>'
 
-    return redirect(url_for("profile"))
+    if check_password_hash(current_user_password, current_password):
+        current_user.update_password(current_user.id, new_password)
+        return '<div class="text-green-500">Password updated successfully</div>'
+
+    return '<div class="text-red-500">Current password is incorrect</div>'
 
 
 def validate_password(password):

@@ -119,7 +119,3 @@ class TrainingClass:
 
     def __str__(self):
         return f"Training_Class(id={self.id}, title={self.title}, description={self.description}, trainer={self.trainer}, date={self.date}, time={self.time}, duration={self.duration}, cost={self.cost})"
-
-
-if __name__ == "__main__":
-    ...

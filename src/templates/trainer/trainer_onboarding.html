@@ -8,94 +8,46 @@
     <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
         <div class="p-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Submit Trainer Request</h2>
-            
-            <form action="" method="POST" class="space-y-4">
-                <div>
-                    <label for="linkedin_url" class="block text-sm font-medium text-gray-700">LinkedIn Profile URL</label>
-                    <input 
-                        type="url" 
-                        id="linkedin_url" 
-                        name="linkedin_url" 
-                        required 
-                        placeholder="https://www.linkedin.com/in/your-profile"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                </div>
+            <div>
+                <label for="linkedin_url" class="block text-sm font-medium text-gray-700">LinkedIn Profile URL</label>
+                <input 
+                    type="url" 
+                    id="linkedin_url" 
+                    name="linkedin_url" 
+                    required 
+                    placeholder="https://www.linkedin.com/in/your-profile"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+            </div>
 
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                    <textarea 
-                        id="description" 
-                        name="description" 
-                        rows="4" 
-                        required
-                        placeholder="Tell us why you want to become a trainer..."
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    ></textarea>
-                </div>
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    rows="4" 
+                    required
+                    placeholder="Tell us why you want to become a trainer..."
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                ></textarea>
+            </div>
 
-                <div class="pt-4">
-                    <button 
-                        type="submit" 
-                        class="w-full bg-gradient-to-r from-violet-500 to-indigo-500 text-white py-2 rounded-md hover:from-violet-600 hover:to-indigo-600 transition duration-300 flex items-center justify-center"
-                    >
-                        Submit Request
-                    </button>
-                </div>
-            </form>
+            <div class="pt-4">
+                <button 
+                    type="submit" 
+                    hx-post="{{ url_for('base.trainer_request') }}"
+                    hx-target="#trainer-requests"
+                    hx-swap="innerHTML"
+                    hx-include="#description, #linkedin_url"
+                    class="w-full bg-gradient-to-r from-violet-500 to-indigo-500 text-white py-2 rounded-md hover:from-violet-600 hover:to-indigo-600 transition duration-300 flex items-center justify-center"
+                >
+                    Submit Request
+                </button>
+            </div>
         </div>
 
-        <div class="p-6 bg-gray-50 border-t">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Previous Requests</h3>
-            
-            {% if trainer_requests %}
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-100">
-                            <tr>
-                                <th scope="col" class="px-4 py-3">Timestamp</th>
-                                <th scope="col" class="px-4 py-3">LinkedIn URL</th>
-                                <th scope="col" class="px-4 py-3">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for request in trainer_requests %}
-                            <tr class="bg-white border-b hover:bg-gray-50">
-                                <td class="px-4 py-3">
-                                    {{ request.timestamp.strftime('%Y-%m-%d %H:%M') }}
-                                </td>
-                                <td class="px-4 py-3">
-                                    <a 
-                                        href="{{ request.linkedin_url }}" 
-                                        target="_blank" 
-                                        class="text-blue-600 hover:underline"
-                                    >
-                                        View LinkedIn Profile
-                                    </a>
-                                </td>
-                                <td class="px-4 py-3">
-                                    {% if request.status == 'Pending' %}
-                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
-                                            {{ request.status }}
-                                        </span>
-                                    {% elif request.status == 'Accepted' %}
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full">
-                                            {{ request.status }}
-                                        </span>
-                                    {% else %}
-                                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full">
-                                            {{ request.status }}
-                                        </span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-gray-500 text-center">No previous trainer requests found.</p>
-            {% endif %}
+        <div id="trainer-requests" class="p-6 bg-gray-50 border-t">
+            {% include "trainer/trainer_requests.html" %}
         </div>
     </div>
 </div>

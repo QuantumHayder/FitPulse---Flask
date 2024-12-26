@@ -1,0 +1,113 @@
+{% if trainer_requests %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Details</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for request, user in trainer_requests %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-gray-600 font-medium">
+                                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ user.first_name }} {{ user.last_name }}
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    {{ user.email }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">
+                            <p class="mb-2">{{ request.description|truncate(100) }}</p>
+                            <a 
+                                href="{{ request.linkedin_url }}" 
+                                target="_blank" 
+                                class="inline-flex items-center text-sm text-blue-600 hover:text-blue-900"
+                            >   
+                                <div class="flex flex-row gap-2 justify-center items-start">
+                                    <svg width="1rem" height="1rem" viewBox="0 -2 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>LinkedIn-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-702.000000, -265.000000)" fill="#007EBB"> <path d="M746,305 L736.2754,305 L736.2754,290.9384 C736.2754,287.257796 734.754233,284.74515 731.409219,284.74515 C728.850659,284.74515 727.427799,286.440738 726.765522,288.074854 C726.517168,288.661395 726.555974,289.478453 726.555974,290.295511 L726.555974,305 L716.921919,305 C716.921919,305 717.046096,280.091247 716.921919,277.827047 L726.555974,277.827047 L726.555974,282.091631 C727.125118,280.226996 730.203669,277.565794 735.116416,277.565794 C741.21143,277.565794 746,281.474355 746,289.890824 L746,305 L746,305 Z M707.17921,274.428187 L707.117121,274.428187 C704.0127,274.428187 702,272.350964 702,269.717936 C702,267.033681 704.072201,265 707.238711,265 C710.402634,265 712.348071,267.028559 712.41016,269.710252 C712.41016,272.34328 710.402634,274.428187 707.17921,274.428187 L707.17921,274.428187 L707.17921,274.428187 Z M703.109831,277.827047 L711.685795,277.827047 L711.685795,305 L703.109831,305 L703.109831,277.827047 L703.109831,277.827047 Z" id="LinkedIn"> </path> </g> </g> </g></svg>
+                                    <p>LinkedIn Profile</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="text-sm text-gray-500 mt-1">
+                            Submitted {{ request.timestamp.strftime('%B %d, %Y at %H:%M') }}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if request.status == 'Pending' %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                {{ request.status }}
+                            </span>
+                        {% elif request.status == 'Accepted' %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                {{ request.status }}
+                            </span>
+                        {% else %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                {{ request.status }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {% if request.status == 'Pending' %}
+                            <div class="flex space-x-2">
+                                <button 
+                                    hx-post="{{ url_for('admin.accept_trainer_request', request_id=request.request_id) }}"
+                                    hx-target="#admin-trainer-request-panel"
+                                    hx-swap="innerHTML"
+                                    type="submit" 
+                                    class="text-green-600 hover:text-green-900">
+                                    Accept
+                                </button>
+                                <button 
+                                    hx-post="{{ url_for('admin.reject_trainer_request', request_id=request.request_id) }}"
+                                    hx-target="#admin-trainer-request-panel"
+                                    hx-swap="innerHTML"
+                                    type="submit" 
+                                    class="text-red-600 hover:text-red-900">
+                                    Reject
+                                </button>
+                            </div>
+                        {% else %}
+                            <button type="button" class="text-gray-600 hover:text-gray-900" disabled>Processed</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No requests found</h3>
+        <p class="mt-1 text-sm text-gray-500">No trainer hire requests have been submitted yet.</p>
+    </div>
+{% endif %}
+
+
+<dd hx-swap-oob="true" id="pending-count" class="mt-1 text-3xl font-semibold text-yellow-600">
+    {{ pending_requests|length }}
+</dd>
+
+<dd hx-swap-oob="true" id="accepted-count" class="mt-1 text-3xl font-semibold text-green-600">
+    {{ accepted_requests|length }}
+</dd>
