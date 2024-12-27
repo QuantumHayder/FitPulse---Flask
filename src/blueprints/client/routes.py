@@ -162,10 +162,14 @@ def enroll_class(class_id):
 
     training_class, _ = TrainingClass.get(class_id)
 
-    if training_class.cost > current_user.points:
-        current_user.points -= training_class.cost
-        print(class_id)
-        current_user.enroll_in_class(class_id)
+    if training_class.cost <= current_user.points:
+        current_user.update_points(current_user.points - training_class.cost)
+
+        try:
+            current_user.enroll_in_class(class_id)
+        except Exception as e:
+            return f"{e}"
+
         return "Enrolled Successfully."
 
     return "Could not Enroll in calss."
@@ -184,6 +188,23 @@ def logs():
     return render_template("client/logs.html", user_logs=user_logs)
 
 
+@client_bp.route("/update-log-reps/<int:log_id>/<int:exercise_id>", methods=["POST"])
+@login_required
+def update_log_reps(log_id, exercise_id):
+    reps = request.form.get("reps")
+    log, _ = ExerciseLog.get(log_id)
+    log.update_exercise(exercise_id, reps)
+
+
+@client_bp.route(
+    "/delete-log-exercise/<int:log_id>/<int:exercise_id>", methods=["POST"]
+)
+@login_required
+def delete_log_exercise(log_id, exercise_id):
+    log, _ = ExerciseLog.get(log_id)
+    log.delete_exercise(exercise_id)
+
+
 @client_bp.route("/foodLog")
 @login_required
 def food_log():
@@ -194,3 +215,12 @@ def food_log():
     logs.sort(key=lambda l: l.timestamp, reverse=True)
     print(logs)
     return render_template("client/foodLog.html", logs=logs)
+
+
+@client_bp.route("/trainer/<int:trainer_id>")
+@login_required
+def trainer_page(trainer_id):
+    t = Trainer.get(trainer_id)
+    classes = TrainingClass.get_all_by_trainer(t.id)
+
+    return render_template("trainer/trainer_profile.html", trainer=t, classes=classes)

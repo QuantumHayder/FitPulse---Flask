@@ -29,16 +29,24 @@
         </div>
     </div>
 
-    {{ primary_button(
-        text='Enroll now',
-        href=url_for('client.enroll_class', class_id=training_class.id),
-        classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition'
-    ) }}
+    {% if current_user.is_enrolled_in_class(training_class.id) %}
+        {{ primary_button(
+            text='Enrolled!',
+            classes='w-full py-2 px-4 text-white rounded-lg bg-gray-300 cursor-not-allowed opacity-50',
+            attrs={"disabled": "true"}
+        ) }}
+    {% else %}
+        {{ primary_button(
+            text='Enroll Now',
+            href=url_for('client.enroll_class', class_id=training_class.id),
+            classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition'
+        ) }}
+    {% endif %}
 
     <div class="mt-6">
         <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Trainer</h3>
         {% with trainer = training_class.get_trainer() %}
-            <a href="#" class="text-blue-600 hover:underline text-md font-medium">
+            <a href="{{url_for('client.trainer_page', trainer_id=trainer.id)}}" class="text-blue-600 hover:underline text-md font-medium">
                 {{ trainer.first_name }} {{ trainer.last_name }}
             </a>
         {% endwith %}

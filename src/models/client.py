@@ -112,16 +112,27 @@ class Client(BaseUser):
             FriendRequest(receiver=other.id, sender=self.id, status=Status.Pending)
         )
 
+    def is_enrolled_in_class(self, class_id: int) -> bool:
+        k = db.fetch_query(
+            'SELECT * FROM public."ClientTrainingClassMap" WHERE "client" = %s AND "training_class" = %s;',
+            (self.id, class_id),
+        )
+
+        return bool(k)
+
     def enroll_in_class(self, class_id: int) -> None:
         c, _ = TrainingClass.get(class_id)
 
         if not c:
             raise ValueError("Class unavailable")
 
-        db.execute_query(
-            'INSERT INTO public."ClientTrainingClassMap" ("training_class", "client") VALUES (%s, %s)',
-            (class_id, self.id),
-        )
+        try:
+            db.execute_query(
+                'INSERT INTO public."ClientTrainingClassMap" ("training_class", "client") VALUES (%s, %s)',
+                (class_id, self.id),
+            )
+        except Exception:
+            raise ValueError("Already enrolled in the course")
 
     def __str__(self):
         return f"Client(id={self.id}, first_name={self.first_name}, last_name={self.last_name}, email={self.email}, points={self.points})"

@@ -30,6 +30,17 @@ class TrainingClass:
     def get_trainer(self):
         return Trainer.get(self.trainer)
 
+    def student_count(self):
+        classes = db.fetch_query(
+            'SELECT COUNT(*) as count FROM public."ClientTrainingClassMap" WHERE training_class = %s',
+            (self.id,),
+        )
+
+        if not classes:
+            return 0
+
+        return classes[0]["count"]
+
     @classmethod
     def get(cls, id: int):
         classes = db.fetch_query(
@@ -48,6 +59,13 @@ class TrainingClass:
         return cls(id=training_class.pop(0), *training_class), Trainer(
             id=trainer.pop(0), password=trainer.pop(1), *trainer
         )
+
+    @classmethod
+    def get_all_by_trainer(cls, trainer_id):
+        classes = db.fetch_query(
+            'SELECT * FROM public."TrainingClass" WHERE trainer = %s;', (trainer_id,)
+        )
+        return [cls(**training_class) for training_class in classes]
 
     @classmethod
     def get_all(cls):
