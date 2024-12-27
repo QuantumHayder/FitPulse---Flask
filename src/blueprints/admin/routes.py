@@ -210,8 +210,12 @@ def create_promotion(class_id: int):
     if not amount or not date or not start or not duration or not training_class:
         return '<div class="text-red-500">All fields are required!</div>', 200
     
-    p = Promotion(amount,date,start,duration,training_class)
-    Promotion.insert(p)
+    try:
+        p = Promotion(amount,date,start,duration,training_class)
+        Promotion.insert(p)
+    except Exception as e:
+        return f'<div class="text-red-500">{e}</div>', 200
+    
     return '<div class="text-green-500">Promotion created succesfully!</div>', 200
 
 @admin_bp.route("/admin-dashboard")

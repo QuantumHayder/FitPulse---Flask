@@ -60,16 +60,19 @@ class Promotion:
         if training_class is None:
             raise ValueError("Cannot assign promotion to non existing training_class.")
 
-        db.execute_query(
-            'INSERT INTO public."Promotion" ("training_class", "amount", "date", "start", "duration") VALUES (%s, %s, %s, %s, %s)',
-            (
-                promotion.training_class,
-                promotion.amount,
-                promotion.date,
-                promotion.start,
-                promotion.duration,
-            ),
-        )
+        try:
+            db.execute_query(
+                'INSERT INTO public."Promotion" ("training_class", "amount", "date", "start", "duration") VALUES (%s, %s, %s, %s, %s)',
+                (
+                    promotion.training_class,
+                    promotion.amount,
+                    promotion.date,
+                    promotion.start,
+                    promotion.duration,
+                ),
+            )
+        except Exception:
+            raise Exception("Training class already has a promotion.")
 
     @classmethod
     def delete(cls, training_class: int) -> None:
