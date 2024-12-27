@@ -29,15 +29,17 @@
         </div>
     </div>
 
-    
+    <div id="message"></div>
 
     {{ primary_button(
         text='Promote',
         attrs= {
             "hx-post": url_for('admin.create_promotion',class_id = training_class.id),
-            "hx-include": "previous form"
+            "hx-include": "previous form",
+            "hx-target": "#message",
+            "hx-swap": "innerHTML"
         },
-        classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition'
+        classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition cursor-pointer'
     ) }}
 
     <div class="mt-6">

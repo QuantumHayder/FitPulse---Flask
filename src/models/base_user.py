@@ -121,5 +121,10 @@ class BaseUser(UserMixin):
     def delete(cls, id: int) -> None:
         db.execute_query(f'DELETE FROM public."{cls.__name__}" WHERE id = %s;', (id,))
 
+    @classmethod
+    def count_all(cls) -> int:
+        users = db.fetch_query(f'SELECT COUNT(*) as count FROM public."{cls.__name__}";')
+        return users[0]['count'] if users else 0
+
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(id={self.id}, first_name={self.first_name}, last_name={self.last_name}, email={self.email})"

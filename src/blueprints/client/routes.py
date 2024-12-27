@@ -6,6 +6,7 @@ from src.models.training_class import TrainingClass
 from src.models.workout_request import WorkoutRequest
 from src.models.client import Client
 from src.models.trainer import Trainer
+from src.models.food_log import FoodLog
 from src.models.base_user import UserRole
 from src.models.exercise_log import ExerciseLog
 
@@ -69,7 +70,6 @@ def training_class_search():
         trainer_id = None
 
     training_classes = TrainingClass.search(title=title, trainer=trainer_id)
-    
 
     return render_template(
         "partials/training_class_table.html", training_classes=training_classes
@@ -86,12 +86,17 @@ def friends():
         email = request.args.get("search")
         other = Client.get_by_email(email)
         if other:
-            current_user.send_friend_request(other)
+            try:
+                current_user.send_friend_request(other)
+            except Exception as e:
+                return f"<div class='text-red-500'>{e}</div>"
+
             return f"<div class='text-green-500'>Request sent to {other.first_name} {other.last_name}</div>"
         return f"<div class='text-red-500'>No user with the specified email.</div>"
 
     context = {"friend_requests": current_user.get_pending_requests_received()}
     return render_template("client/friends.html", **context)
+
 
 @client_bp.route("/request-workout-plan")
 @login_required
@@ -99,10 +104,12 @@ def workout_plan():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    clients_requests=WorkoutRequest.get_requests_by_client(current_user.id)
+    clients_requests = WorkoutRequest.get_requests_by_client(current_user.id)
 
     return render_template(
-        "request-workout-plan.html",trainers=Trainer.get_all() ,  clients_request = clients_requests
+        "request-workout-plan.html",
+        trainers=Trainer.get_all(),
+        clients_request=clients_requests,
     )
 
 
@@ -117,9 +124,6 @@ def workout_plan_request():
 
     trainer = request.args.get("trainer")
     description = request.args.get("description")
-    
-    if not description or not trainer:
-            return '<div class="text-red-500">All fields are required!</div>', 200
 
     WorkoutRequest.insert(WorkoutRequest(current_user.id, datetime.now(), trainer , description, status='Pending'))
    
@@ -127,10 +131,7 @@ def workout_plan_request():
     return success_message, 201
 
 
-
-
 @client_bp.route("/dashboard")
-@login_required
 def dashboard():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
@@ -139,13 +140,44 @@ def dashboard():
     return render_template("client/dashboard.html", **context)
 
 
-@client_bp.route("/goals")
+@client_bp.route("/goals", methods=["GET", "POST"])
 @login_required
 def goals():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    return render_template("client/goals.html")
+    if request.method == "GET":
+            return render_template("client/goals.html")
+    
+    calories = request.form.get("calories")
+
+    print(calories)
+
+    if not calories:
+        return '<div class="text-red-500 text-center my-1">Enter calories!</div>', 200
+    
+    current_user.update_calories(calories)
+
+    return '<div class="text-green-500 text-center my-1">Updated goal successfully</div>', 200
+
+
+@client_bp.route("/enroll_class/<int:class_id>")
+@login_required
+def enroll_class(class_id):
+
+    training_class, _ = TrainingClass.get(class_id)
+
+    if training_class.cost <= current_user.points:
+        current_user.update_points(current_user.points - training_class.cost)
+
+        try:
+            current_user.enroll_in_class(class_id)
+        except Exception as e:
+            return f"{e}"
+
+        return "Enrolled Successfully."
+
+    return "Could not Enroll in calss."
 
 
 @client_bp.route("/logs")
@@ -159,3 +191,41 @@ def logs():
     user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
 
     return render_template("client/logs.html", user_logs=user_logs)
+
+
+@client_bp.route("/update-log-reps/<int:log_id>/<int:exercise_id>", methods=["POST"])
+@login_required
+def update_log_reps(log_id, exercise_id):
+    reps = request.form.get("reps")
+    log, _ = ExerciseLog.get(log_id)
+    log.update_exercise(exercise_id, reps)
+
+
+@client_bp.route(
+    "/delete-log-exercise/<int:log_id>/<int:exercise_id>", methods=["POST"]
+)
+@login_required
+def delete_log_exercise(log_id, exercise_id):
+    log, _ = ExerciseLog.get(log_id)
+    log.delete_exercise(exercise_id)
+
+
+@client_bp.route("/foodLog")
+@login_required
+def food_log():
+    if current_user.role != UserRole.Client:
+        return redirect(url_for("base.onboarding"))
+
+    logs = FoodLog.get_all(current_user.id)
+    logs.sort(key=lambda l: l.timestamp, reverse=True)
+    print(logs)
+    return render_template("client/foodLog.html", logs=logs)
+
+
+@client_bp.route("/trainer/<int:trainer_id>")
+@login_required
+def trainer_page(trainer_id):
+    t = Trainer.get(trainer_id)
+    classes = TrainingClass.get_all_by_trainer(t.id)
+
+    return render_template("trainer/trainer_profile.html", trainer=t, classes=classes)

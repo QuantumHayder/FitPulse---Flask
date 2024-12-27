@@ -58,6 +58,28 @@ class ExerciseLog:
             (reps, self.id, exercise),
         )
 
+    def delete_exercise(self, exercise: int) -> None:
+        e = Exercise.get(exercise)
+        if not e:
+            raise ValueError("Cannot delete a non-existent exercise to log.")
+
+        l = ExerciseLog.get(self.id)
+        if not l:
+            raise ValueError("Cannot update a non-existent log in ExerciseLogMap.")
+
+        exercises_log = db.fetch_query(
+            'SELECT * FROM public."LogExerciseMap" WHERE log = %s AND exercise= %s ',
+            (self.id, exercise),
+        )
+
+        if not exercises_log:
+            return None
+
+        db.execute_query(
+            'DELETE FROM public."LogExerciseMap" WHERE log = %s AND exercise = %s',
+            (self.id, exercise),
+        )
+
     @classmethod
     def get(cls, id: int):
         exercises_log = db.fetch_query(

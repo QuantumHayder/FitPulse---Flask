@@ -15,7 +15,11 @@ from src.models.base_user import UserRole
 from src.models.user import User
 from src.models.admin import Admin
 from src.models.trainer import Trainer
+from src.models.training_class import TrainingClass
+from src.models.client import Client
+from src.models.promotion import Promotion
 from src.models.food import Food
+from src.models.food_log import FoodLog
 from src.models.trainer_request import TrainerRequest, Status
 from src.models.training_class import TrainingClass
 from src.models.promotion import Promotion
@@ -206,13 +210,50 @@ def create_promotion(class_id: int):
     if not amount or not date or not start or not duration or not training_class:
         return '<div class="text-red-500">All fields are required!</div>', 200
     
-    p = Promotion(amount,date,start,duration,training_class)
-    Promotion.insert(p)
+    try:
+        p = Promotion(amount,date,start,duration,training_class)
+        Promotion.insert(p)
+    except Exception as e:
+        return f'<div class="text-red-500">{e}</div>', 200
+    
+    return '<div class="text-green-500">Promotion created succesfully!</div>', 200
 
-@admin_bp.route("/admin-dashboard", methods=["GET"])
+@admin_bp.route("/admin-dashboard")
 @login_required
 def dashboard():
-    if current_user.role != UserRole.Admin:
-        return Response("Bad Request", 400)
+    
+    adminCount = Admin.count_all()
+    trainerCount = Trainer.count_all()
+    clientCount = Client.count_all()
+    
+    rejectedTrainerRequest = TrainerRequest.count_rejected()
+    pendingTrainerRequest = TrainerRequest.count_pending()
+    
+    avg_class_cost = TrainingClass.avg_class_cost()
+    avgPromAmount = Promotion.avgPromotionAmount()
+    
+    top_class,top_trainer, bottom_class, bottom_trainer = TrainingClass.class_and_trainer()
+    top_friends_client, bottom_friends_client = Client.top_and_bottom_clients()
+    print(top_friends_client)
+    print(bottom_friends_client)
+    
+    
+    return render_template(
+    "admin/dashboard.html",
+    adminCount=adminCount,
+    trainerCount=trainerCount,
+    avgPromAmount=avgPromAmount,
+    clientCount=clientCount,
+    rejectedTrainerRequest=rejectedTrainerRequest,
+    pendingTrainerRequest=pendingTrainerRequest,
+    avg_class_cost=avg_class_cost,
+    top_class=top_class,
+    top_trainer=top_trainer,
+    bottom_class=bottom_class,
+    bottom_trainer=bottom_trainer,
+    top_friends_client=top_friends_client,
+    bottom_friends_client=bottom_friends_client
+)
 
-    return render_template("admin/dashboard.html")
+
+
