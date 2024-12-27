@@ -7,17 +7,23 @@
 
 <div class="max-w-3xl mx-auto px-6">
     <div class="mb-8">
-        <form class="flex gap-4" hx-get="{{ url_for('client.friends') }}" hx-trigger="submit, change from:[name='search']" hx-target="#search-results" hx-swap="innerHTML">
+        <form class="flex gap-4">
             <div class="flex-1">
                 <input 
                     type="search" 
                     name="search" 
+                    id="search"
                     placeholder="Search friends by name or email..."
                     class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 >
             </div>
             <button 
                 type="submit"
+                hx-get="{{ url_for('client.friends') }}" 
+                hx-trigger="click" 
+                hx-target="#search-results" 
+                hx-include="#search"
+                hx-swap="innerHTML"
                 class="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg hover:from-violet-700 hover:to-indigo-700 transition-all duration-200"
             >
                 Send Request
@@ -41,12 +47,7 @@
         <div class="p-6">
             <h2 class="text-lg font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent mb-4">Your Friends</h2>
             <div id="current-friends" class="max-h-[300px] overflow-y-auto [-ms-overflow-style:'none'] [scrollbar-width:'none'] [&::-webkit-scrollbar]:hidden space-y-3">
-                {% for client in current_user.get_friends() %}
-                    <div class="flex items-center space-x-3">
-                        <div class="min-w-10 min-h-10 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 flex items-center justify-center text-white font-medium">{{client.first_name[0]|upper}}{{client.last_name[0]|upper}}</div>
-                        <span class="text-gray-700">{{ client.first_name }} {{ client.last_name }}</span>
-                    </div>
-                {% endfor %}
+                {% include "components/current_friends_section.html" %}
             </div>
         </div>
     </div>

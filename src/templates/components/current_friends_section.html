@@ -1,0 +1,10 @@
+{% if current_user.get_friends() %}
+    {% for client in current_user.get_friends() %}
+        <div class="flex items-center space-x-3">
+            <div class="min-w-10 min-h-10 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 flex items-center justify-center text-white font-medium">{{client.first_name[0]|upper}}{{client.last_name[0]|upper}}</div>
+            <span class="text-gray-700">{{ client.first_name }} {{ client.last_name }}</span>
+        </div>
+    {% endfor %}
+{% else %}
+    <p class="text-gray-500 text-center justify-center items-centers">You currently don't have any friends.</p>
+{% endif %}

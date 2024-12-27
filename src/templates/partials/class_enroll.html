@@ -1,0 +1,24 @@
+{% from 'components/buttons.html' import primary_button %}
+
+<h1 class="text-center
+    {% if message.error %}
+        text-red-500
+    {% else %}
+        text-green-500
+    {% endif %}
+    ">
+    {{message.message}}
+</h1>
+
+{% if htmx %}
+        {% set button_id = "button-c-" + training_class.id|string %}
+        {{ primary_button(
+            text='Enrolled!',
+            classes='w-full py-2 px-4 text-white rounded-lg bg-gray-300 cursor-not-allowed opacity-50',
+            attrs={
+                "disabled": "true",
+                "hx-swap-oob": "true",
+                "id": button_id
+            }
+        ) }}
+{% endif %}

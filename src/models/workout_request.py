@@ -97,7 +97,6 @@ class WorkoutRequest:
     def update_status(self, new_status: Status):
         if self.status == new_status:
             return
-        print(self)
         db.execute_query(
             'UPDATE public."WorkoutRequest" SET status = %s WHERE id = %s;',
             (new_status, self.id),

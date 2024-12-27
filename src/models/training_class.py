@@ -3,6 +3,7 @@ from datetime import datetime, time, date
 
 from . import db
 from .trainer import Trainer
+import src.models.promotion as promotion
 
 
 class TrainingClass:
@@ -26,6 +27,14 @@ class TrainingClass:
         self.time = time
         self.duration = duration
         self.cost = cost
+
+    def get_current_promotion(self):
+        p = promotion.Promotion.get(self.id)
+
+        if not p:
+            return None
+
+        return p.amount
 
     def get_trainer(self):
         return Trainer.get(self.trainer)
@@ -74,21 +83,23 @@ class TrainingClass:
         return [cls(**training_class) for training_class in classes]
 
     @classmethod
-
     def avg_class_cost(cls):
-        result = db.fetch_query('SELECT AVG(cost) as average_cost FROM public."TrainingClass";')
-        average_cost = result[0]['average_cost'] if result else None
+        result = db.fetch_query(
+            'SELECT AVG(cost) as average_cost FROM public."TrainingClass";'
+        )
+        average_cost = result[0]["average_cost"] if result else None
 
         return round(average_cost, 2) if average_cost is not None else None
 
     @classmethod
     def class_and_trainer(cls):
-        query = '''
+        query = """
         SELECT training_class, COUNT(client) as client_count 
         FROM public."ClientTrainingClassMap" 
         GROUP BY training_class 
         ORDER BY client_count DESC;
-    '''
+        """
+        
         result = db.fetch_query(query)
         if not result:
             return None,None,None,None
@@ -99,7 +110,12 @@ class TrainingClass:
         worst_training_class,worst_trainer = TrainingClass.get(worst_class_id)  or (None, None)
         
         if best_training_class and worst_training_class:
-            return best_training_class, best_trainer, worst_training_class, worst_trainer
+            return (
+                best_training_class,
+                best_trainer,
+                worst_training_class,
+                worst_trainer,
+            )
         else:
            best_training_class, best_trainer, worst_training_class, worst_trainer = None, None, None, None
            return best_training_class, best_trainer, worst_training_class, worst_trainer
