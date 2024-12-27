@@ -213,14 +213,7 @@ def create_promotion(class_id: int):
     p = Promotion(amount,date,start,duration,training_class)
     Promotion.insert(p)
 
-@admin_bp.route("/admin-dashboard", methods=["GET"])
-@login_required
-def dashboard():
-    if current_user.role != UserRole.Admin:
-        return Response("Bad Request", 400)
-
-    return render_template("admin/dashboard.html")
-@admin_bp.route("/dashboard")
+@admin_bp.route("/admin-dashboard")
 @login_required
 def dashboard():
     adminCount = Admin.count_all()
