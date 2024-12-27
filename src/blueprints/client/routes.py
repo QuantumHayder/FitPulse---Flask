@@ -5,6 +5,7 @@ from flask_htmx import HTMX
 from src.models.training_class import TrainingClass
 from src.models.client import Client
 from src.models.base_user import UserRole
+from src.models.exercise_log import ExerciseLog
 
 client_bp = Blueprint("client", __name__)
 htmx = HTMX(client_bp)
@@ -70,6 +71,24 @@ def training_class_search():
     )
 
 
+@client_bp.route("/friends")
+@login_required
+def friends():
+    if current_user.role != UserRole.Client:
+        return Response("Bad Request", status=201)
+
+    if request.method == "GET" and htmx:
+        email = request.args.get("search")
+        other = Client.get_by_email(email)
+        if other:
+            current_user.send_friend_request(other)
+            return f"<div class='text-green-500'>Request sent to {other.first_name} {other.last_name}</div>"
+        return f"<div class='text-red-500'>No user with the specified email.</div>"
+
+    context = {"friend_requests": current_user.get_pending_requests_received()}
+    return render_template("client/friends.html", **context)
+
+
 @client_bp.route("/dashboard")
 @login_required
 def dashboard():
@@ -77,4 +96,26 @@ def dashboard():
         return redirect(url_for("base.onboarding"))
 
     context = {"friend_requests": current_user.get_pending_requests_received()}
-    return render_template("dashboard.html", **context)
+    return render_template("client/dashboard.html", **context)
+
+
+@client_bp.route("/goals")
+@login_required
+def goals():
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding"))
+
+    return render_template("client/goals.html")
+
+
+@client_bp.route("/logs")
+@login_required
+def logs():
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding"))
+
+    user_logs = ExerciseLog.get_all(current_user.id)
+
+    user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
+
+    return render_template("client/logs.html", user_logs=user_logs)

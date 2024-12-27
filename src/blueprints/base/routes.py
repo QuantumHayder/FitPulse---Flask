@@ -87,7 +87,7 @@ def onboarding():
     return render_template("onboarding.html")
 
 
-@base_bp.route("/exercises")
+@base_bp.route("/exercises", methods=["GET"])
 @login_required
 def exercises():
     if current_user.role == UserRole.User:

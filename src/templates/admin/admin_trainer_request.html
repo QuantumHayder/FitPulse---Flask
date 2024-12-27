@@ -108,6 +108,10 @@
     {{ pending_requests|length }}
 </dd>
 
-<dd hx-swap-oob="true" id="accepted-count" class="mt-1 text-3xl font-semibold text-green-600">
-    {{ accepted_requests|length }}
+<dd hx-swap-oob="true" id="rejected-count" class="mt-1 text-3xl font-semibold text-red-600">
+    {{ rejected_requests|length }}
+</dd>
+
+<dd hx-swap-oob="true" id="total-count" class="mt-1 text-3xl font-semibold text-gray-900">
+    {{ trainer_requests|length }}
 </dd>

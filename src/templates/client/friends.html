@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %} FitPulse | Friends {% endblock title %}
+
+{% block body %}
+<h1 class="text-center text-3xl font-bold mb-6 text-gray-800">Friends</h1>
+
+<div class="max-w-3xl mx-auto px-6">
+    <!-- Friend Search Section -->
+    <div class="mb-8">
+        <form class="flex gap-4" hx-get="{{ url_for('client.friends') }}" hx-trigger="submit, change from:[name='search']" hx-target="#search-results" hx-swap="innerHTML">
+            <div class="flex-1">
+                <input 
+                    type="search" 
+                    name="search" 
+                    placeholder="Search friends by name or email..."
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                >
+            </div>
+            <button 
+                type="submit"
+                class="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg hover:from-violet-700 hover:to-indigo-700 transition-all duration-200"
+            >
+                Send Request
+            </button>
+        </form>
+    </div>
+
+    <!-- Search Results Section -->
+    <div id="search-results" class="mb-8">
+        <!-- Search results will be populated here -->
+    </div>
+
+    <!-- Friend Requests Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:border-violet-200 transition-all duration-200">
+        <div class="p-6">
+            <h2 class="text-lg font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent mb-4">Friend Requests</h2>
+            <div id="friend-requests" class="max-h-[300px] overflow-y-auto [-ms-overflow-style:'none'] [scrollbar-width:'none'] [&::-webkit-scrollbar]:hidden space-y-3">
+                {% include "components/friend_request_section.html" %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}

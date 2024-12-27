@@ -31,8 +31,8 @@ def handle_trainer_request():
 
     trainer_requests = TrainerRequest.get_all()
 
-    accepted_requests = list(
-        filter(lambda r: r[0].status == Status.Accepted, trainer_requests)
+    rejected_requests = list(
+        filter(lambda r: r[0].status == Status.Rejected, trainer_requests)
     )
 
     pending_requests = list(
@@ -42,7 +42,7 @@ def handle_trainer_request():
     return render_template(
         "admin/hire_trainer.html",
         trainer_requests=trainer_requests,
-        accepted_requests=accepted_requests,
+        rejected_requests=rejected_requests,
         pending_requests=pending_requests,
     )
 
@@ -66,8 +66,8 @@ def accept_trainer_request(request_id):
 
     trainer_requests = TrainerRequest.get_all()
 
-    accepted_requests = list(
-        filter(lambda r: r[0].status == Status.Accepted, trainer_requests)
+    rejected_requests = list(
+        filter(lambda r: r[0].status == Status.Rejected, trainer_requests)
     )
 
     pending_requests = list(
@@ -77,7 +77,7 @@ def accept_trainer_request(request_id):
     return render_template(
         "admin/admin_trainer_request.html",
         trainer_requests=trainer_requests,
-        accepted_requests=accepted_requests,
+        rejected_requests=rejected_requests,
         pending_requests=pending_requests,
     )
 
@@ -181,6 +181,7 @@ def create_admin():
 def manage_promotion():
     if current_user.role != UserRole.Admin:
         return Response("Bad Request", 400)
+
     return render_template("admin/manage_promotion.html")
 
 
@@ -189,4 +190,5 @@ def manage_promotion():
 def dashboard():
     if current_user.role != UserRole.Admin:
         return Response("Bad Request", 400)
+
     return render_template("admin/dashboard.html")
