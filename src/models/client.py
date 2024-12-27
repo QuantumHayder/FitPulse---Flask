@@ -15,10 +15,12 @@ class Client(BaseUser):
         last_name: str,
         *args,
         points: int = 0,
+        calories: int = 2000,
         **kwargs,
     ):
         super().__init__(email, first_name, last_name, *args, **kwargs)
         self.points = points
+        self.calories = calories
 
     def get_friends(self):
 
