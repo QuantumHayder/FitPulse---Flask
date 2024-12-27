@@ -12,8 +12,10 @@ from flask_htmx import HTMX
 
 from src.models.base_user import UserRole
 from src.models.workout_request import WorkoutRequest
+from src.models.workout_plan import WorkoutPlan
 from src.models.training_class import TrainingClass
 from src.models.trainer import Trainer
+from src.models.exercise import Exercise
 from src.models.client import Client
 
 trainer_bp = Blueprint("trainer", __name__)
@@ -63,11 +65,24 @@ def view_plan_requests():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    clients_requests = WorkoutRequest.get_requests_by_trainer(current_user.id)
+    pending_requests=current_user.get_pending_requests_by_trainer()
+    
+    return render_template("trainer/view-plan-requests.html",clients_request = pending_requests , exercises=Exercise.get_all())
 
-    return render_template(
-        "trainer/view-plan-requests.html", clients_request=clients_requests
-    )
+
+
+
+
+
+@trainer_bp.route("/view-old-plan-requests", methods=["GET", "POST"])
+@login_required
+def view_old_plan_requests():
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding"))
+
+    all_requests=WorkoutRequest.get_requests_by_trainer(current_user.id)
+    return render_template("trainer/view-old-plan-requests.html", all_requests=all_requests)
+
 
 
 @trainer_bp.route("/accept-plan-request/<int:plan_id>/", methods=["POST"])
@@ -82,8 +97,10 @@ def accept_plan_request(plan_id):
 
     current_user.accept_plan_request(plan_id)
     return render_template(
-        "components/friend_request_section.html",
-        friend_requests=current_user.get_pending_requests_by_trainer(),
+        "trainer/accept_plan_requests.html",
+        accepted=True,
+        exercises=Exercise.get_all()
+
     )
 
 
@@ -99,8 +116,8 @@ def reject_plan_request(plan_id):
 
     current_user.reject_plan_request(plan_id)
     return render_template(
-        "components/friend_request_section.html",
-        plan_requests=current_user.get_pending_requests_by_trainer(),
+        "trainer/accept_plan_requests.html",
+        accepted=False,
     )
 
 
@@ -111,3 +128,11 @@ def profile():
         return redirect(url_for("base.onboarding"))
     trainer_info = Trainer.get(current_user.id)
     return render_template("trainer/profile.html", trainer_info=trainer_info)
+
+@trainer_bp.route("/create-workout", methods=["POST"])
+def create_workout():
+    trainer=current_user.id
+    
+
+
+    
