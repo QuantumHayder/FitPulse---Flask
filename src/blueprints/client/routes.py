@@ -121,7 +121,7 @@ def workout_plan_request():
     if not description or not trainer:
             return '<div class="text-red-500">All fields are required!</div>', 200
 
-    WorkoutRequest.insert(WorkoutRequest(current_user.id, datetime.now(), trainer , description))
+    WorkoutRequest.insert(WorkoutRequest(current_user.id, datetime.now(), trainer , description, status='Pending'))
    
     success_message = f"<div class='text-green-500'>Workout Request sent successfully!</div>"
     return success_message, 201

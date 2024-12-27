@@ -2,8 +2,9 @@ from typing import Self
 
 from . import db
 from .client import Client
-from .trainer import Trainer
+import src.models.trainer as trainer
 from datetime import date, datetime
+from .trainer_request import Status
 
 
 class WorkoutRequest:
@@ -13,6 +14,7 @@ class WorkoutRequest:
         timestamp: date,
         trainer: int,
         description: str,
+        status:str,
         *args,
         **kwargs,
     ) -> None:
@@ -21,6 +23,7 @@ class WorkoutRequest:
         self.timestamp = timestamp
         self.trainer = trainer
         self.description = description
+        self.status=status
 
     @classmethod
     def get_requests_by_trainer(cls, trainer: int):
@@ -33,6 +36,8 @@ class WorkoutRequest:
             return None
 
         return [cls(**r) for r in workout_requests]
+    
+    
 
     @classmethod
     def get_requests_by_client(cls, client: int):
@@ -63,7 +68,7 @@ class WorkoutRequest:
                 "Cannot insert workout_request with description set to NULL."
             )
 
-        trainer = Trainer.get(workout_request.trainer)
+        trainer = trainer.Trainer.get(workout_request.trainer)
 
         if trainer is None:
             raise ValueError("Cannot assign workout plan to non existing trainer.")
@@ -74,30 +79,51 @@ class WorkoutRequest:
             raise ValueError("Cannot assign workout plan to non existing client.")
 
         db.execute_query(
-            'INSERT INTO public."WorkoutRequest" ("client", "timestamp", "trainer", "description") VALUES (%s, %s, %s, %s)',
+            'INSERT INTO public."WorkoutRequest" ("client", "timestamp", "trainer", "description","status") VALUES (%s, %s, %s, %s, %s)',
             (
                 workout_request.client,
                 workout_request.timestamp,
                 workout_request.trainer,
                 workout_request.description,
+                workout_request.status,
             ),
         )
 
     @classmethod
-    def delete(cls, client: int, timestamp: date, trainer: int) -> None:
+    def delete(cls, id : int) -> None:
         db.execute_query(
-            'DELETE FROM public."WorkoutRequest" WHERE client = %s AND timestamp = %s AND trainer = %s',
+            'DELETE FROM public."WorkoutRequest" WHERE id = %s',
             (
-                client,
-                timestamp,
-                trainer,
+                id,
             ),
         )
+    def update_status(self, new_status: Status):
+        if self.status == new_status:
+            return
+        print(self)
+        db.execute_query(
+            'UPDATE public."WorkoutRequest" SET status = %s WHERE id = %s;',
+            (new_status, self.id),
+        )
+
+    @classmethod
+    def get(cls, plan_id:int):
+        requests = db.fetch_query(
+            'SELECT * FROM public."WorkoutRequest" WHERE id = %s ',
+            (plan_id,),
+        )
+        if not requests:
+            return None
+        
+        return cls(**requests[0])
+    
     def get_trainer(self):
-        return Trainer.get(self.trainer)
+        return trainer.Trainer.get(self.trainer)
     
     def get_client(self):
         return Client.get(self.client)
 
     def __str__(self):
-        return f"WorkoutRequest(client={self.client}, timestamp={self.timestamp}, trainer={self.trainer}, description={self.description})"
+        
+        return f"WorkoutRequest(id={self.id}, client={self.client}, timestamp={self.timestamp}, trainer={self.trainer}, description={self.description}, status={self.status})"
+    

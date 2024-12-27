@@ -14,6 +14,7 @@ from src.models.base_user import UserRole
 from src.models.workout_request import WorkoutRequest
 from src.models.training_class import TrainingClass
 from src.models.trainer import Trainer
+from src.models.client import Client
 
 trainer_bp = Blueprint("trainer", __name__)
 htmx = HTMX(trainer_bp)
@@ -53,6 +54,40 @@ def view_plan_requests():
     clients_requests=WorkoutRequest.get_requests_by_trainer(current_user.id)
     
     return render_template("trainer/view-plan-requests.html",clients_request = clients_requests)
+
+@trainer_bp.route("/accept-plan-request/<int:plan_id>/", methods=["POST"])
+@login_required
+def accept_plan_request(plan_id):
+    if not htmx:
+        return Response("Bad Request", status=201)
+
+    plan = WorkoutRequest.get(plan_id)
+    if plan is None:
+        return
+
+    current_user.accept_plan_request(plan)
+    return render_template(
+        "components/friend_request_section.html",
+        friend_requests=current_user.get_pending_requests_by_trainer(),
+    )
+
+@trainer_bp.route("/reject-plan-request/<int:plan_id>", methods=["POST"])
+@login_required
+def reject_plan_request(plan_id):
+    if not htmx:
+        return Response("Bad Request", status=201)
+
+    plan = WorkoutRequest.get(plan_id)
+    if plan is None:
+        return
+
+    current_user.reject_plan_request(plan)
+    return render_template(
+        "components/friend_request_section.html",
+        plan_requests=current_user.get_pending_requests_by_trainer(),
+    )
+
+
 
 @trainer_bp.route("/profile")
 @login_required
