@@ -1,9 +1,32 @@
 {% extends "base.html" %}
 
+{% from 'components/buttons.html' import primary_button %}
+
 {% block title %} FitPulse | Goals {% endblock title %}
 
 {% block body %}
 <h1 class="text-center text-3xl font-bold mb-6 text-gray-800"> Goals </h1>
-
-   
+<div id="message" class="m-6"></div>
+<div class="text-center m-6">
+    <input 
+    type="number" 
+    name="calories" 
+    id="calories" 
+    placeholder="Enter calories" 
+    class="text-center py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+>
+</div>
+<div class="text-center mx-auto max-w-[183px]">
+    {{ primary_button(
+        text='Set goal',
+        attrs={
+            "hx-post":url_for('client.goals'),
+            "hx-trigger": "click",
+            "hx-include": "#calories",
+            "hx-target": "#message",
+            "hx-swap": "innerHTML"
+        },
+        classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition cursor-pointer'
+    ) }}
+</div>
 {% endblock body %}

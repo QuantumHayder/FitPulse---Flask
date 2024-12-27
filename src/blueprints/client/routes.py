@@ -147,13 +147,25 @@ def dashboard():
     return render_template("client/dashboard.html", **context)
 
 
-@client_bp.route("/goals")
+@client_bp.route("/goals", methods=["GET", "POST"])
 @login_required
 def goals():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    return render_template("client/goals.html")
+    if request.method == "GET":
+            return render_template("client/goals.html")
+    
+    calories = request.form.get("calories")
+
+    print(calories)
+
+    if not calories:
+        return '<div class="text-red-500 text-center my-1">Enter calories!</div>', 200
+    
+    current_user.update_calories(calories)
+
+    return '<div class="text-green-500 text-center my-1">Updated goal successfully</div>', 200
 
 
 @client_bp.route("/enroll_class/<int:class_id>")
