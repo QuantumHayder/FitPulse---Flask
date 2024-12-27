@@ -3,6 +3,7 @@ from datetime import datetime
 from .base_user import BaseUser, UserRole
 from .trainer_request import Status
 from .friend_request import FriendRequest
+from src.models import db
 
 
 class Client(BaseUser):
@@ -22,6 +23,11 @@ class Client(BaseUser):
         self.points = points
         self.calories = calories
 
+    @classmethod
+    def get_all(cls):
+        classes = db.fetch_query('SELECT * FROM public."Client";')
+        return [cls(**training_class) for training_class in classes]
+    
     def get_friends(self):
 
         received = {
@@ -39,6 +45,33 @@ class Client(BaseUser):
         user_ids = list(sent.union(received))
 
         return [Client.get(uid) for uid in user_ids]
+    
+    @classmethod
+    def top_and_bottom_clients(cls):
+        # Get all clients
+        clients = cls.get_all()
+        
+        if not clients:
+            return None, None  # Return None if no clients are found
+        
+        # Create a dictionary to store the number of friends for each client
+        friends_count = {}
+
+        for client in clients:
+            # Get the list of friends for each client
+            friends = client.get_friends()
+            friends_count[client] = len(friends)
+
+        # Find the client with the most friends
+        top_client = max(friends_count, key=friends_count.get, default=None)
+        
+        # Find the client with the fewest friends
+        bottom_client = min(friends_count, key=friends_count.get, default=None)
+
+        # Return the top and bottom clients along with their friend counts
+        return (top_client, friends_count[top_client]) if top_client else None, \
+            (bottom_client, friends_count[bottom_client]) if bottom_client else None
+
 
     def get_pending_requests_received(self):
         user_ids = [

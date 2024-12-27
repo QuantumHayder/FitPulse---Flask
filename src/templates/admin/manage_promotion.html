@@ -11,10 +11,10 @@
     hx-indicator="#spinner"
     hx-params="*"
     id="promotion-form"
-    class="max-w-2xl mx-auto mb-6 bg-white shadow-md rounded-lg p-6"
+    class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6"
 >   
 
-    <div class="flex flex-row justify-center gap-6">
+    <div class="flex flex-row justify-center gap-6 space-y-6">
         <div class="flex flex-col">
             <label for="title" class="mb-2 text-sm font-medium text-gray-700">Title</label>
             <input 
@@ -25,7 +25,7 @@
                 class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
         </div>
-        <div class="flex items-end">
+        <div class="flex items-col">
             <button 
                 type="submit" 
                 class="w-full bg-gradient-to-r from-violet-500 to-indigo-500 text-white py-2 rounded-md hover:from-violet-600 hover:to-indigo-600 transition duration-300 flex items-center justify-center px-8"
@@ -37,8 +37,8 @@
             </button>
         </div>
     </div>
-    <div class="flex flex-wrap justify-center gap-6">
-        <div class="flex flex-col">
+    <div class="flex flex-row justify-center gap-6 space-y-6">
+        <div class="flex flex-col justify-end">
             <label for="title" class="mb-2 text-sm font-medium text-gray-700">Amount</label>
             <input 
                 type="number" 
@@ -58,8 +58,10 @@
                 class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
         </div>
-        <div class="flex flex-col">
-            <label for="title" class="mb-2 text-sm font-medium text-gray-700">Start</label>
+    </div>
+    <div class="flex flex-row justify-center gap-6 space-y-6">
+        <div class="flex flex-col justify-end">
+            <label for="title" class="mb-2 text-sm font-medium text-gray-700 space-y-6">Start</label>
             <input 
                 type="time" 
                 name="start" 
@@ -81,7 +83,7 @@
     </div>
 </form>
 
-<div id="spinner" class="htmx-indicator inset-0 flex items-center justify-center bg-opacity-75 w-12 h-12 mx-auto my-2">
+<div id="spinner" class="htmx-indicator inset-0 flex items-center justify-center bg-opacity-75 w-12 h-12 mx-auto mt-1">
     <div class="w-12 h-12 border-4 border-violet-500 border-dotted rounded-full animate-spin"></div>
 </div>
 

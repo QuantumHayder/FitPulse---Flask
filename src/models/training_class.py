@@ -55,10 +55,32 @@ class TrainingClass:
         return [cls(**training_class) for training_class in classes]
     
     @classmethod
-    def avgClassCost(cls):
+    def avg_class_cost(cls):
         result = db.fetch_query('SELECT AVG(cost) as average_cost FROM public."TrainingClass";')
         average_cost = result[0]['average_cost'] if result else None
         return round(average_cost, 2) if average_cost is not None else None
+    
+    @classmethod
+    def class_and_trainer(cls):
+        query = '''
+        SELECT training_class, COUNT(client) as client_count 
+        FROM public."ClientTrainingClassMap" 
+        GROUP BY training_class 
+        ORDER BY client_count DESC
+        LIMIT 1;
+    '''
+        result = db.fetch_query(query)
+        if not result:
+            return None
+        best_class_id = result[0][0]
+        worst_class_id = result[-1][-1]
+        best_training_class,best_trainer = TrainingClass.get(best_class_id)
+        worst_training_class,worst_trainer = TrainingClass.get(worst_class_id)
+        
+        if best_training_class and worst_training_class:
+            return best_training_class, best_trainer, worst_training_class, worst_trainer
+        else:
+            return None
     
     @classmethod
     def insert(cls, training_class: Self) -> None:

@@ -216,16 +216,39 @@ def create_promotion(class_id: int):
 @admin_bp.route("/admin-dashboard")
 @login_required
 def dashboard():
+    
     adminCount = Admin.count_all()
     trainerCount = Trainer.count_all()
     clientCount = Client.count_all()
+    
     rejectedTrainerRequest = TrainerRequest.count_rejected()
     pendingTrainerRequest = TrainerRequest.count_pending()
-    avgClassCost = TrainingClass.avgClassCost()
-    avgPromotionAmount = Promotion.avgPromotionAmount()
-    return render_template("admin/dashboard.html", adminCount=adminCount, trainerCount=trainerCount,
-    clientCount=clientCount,rejectedTrainerRequest=rejectedTrainerRequest,pendingTrainerRequest=pendingTrainerRequest,
-    avgClassCost=avgClassCost)
     
+    avg_class_cost = TrainingClass.avg_class_cost()
+    avgPromAmount = Promotion.avgPromotionAmount()
+    
+    top_class,top_trainer, bottom_class, bottom_trainer = TrainingClass.class_and_trainer()
+    top_friends_client, bottom_friends_client = Client.top_and_bottom_clients()
+    print(top_friends_client)
+    print(bottom_friends_client)
+    
+    
+    return render_template(
+    "admin/dashboard.html",
+    adminCount=adminCount,
+    trainerCount=trainerCount,
+    avgPromAmount=avgPromAmount,
+    clientCount=clientCount,
+    rejectedTrainerRequest=rejectedTrainerRequest,
+    pendingTrainerRequest=pendingTrainerRequest,
+    avg_class_cost=avg_class_cost,
+    top_class=top_class,
+    top_trainer=top_trainer,
+    bottom_class=bottom_class,
+    bottom_trainer=bottom_trainer,
+    top_friends_client=top_friends_client,
+    bottom_friends_client=bottom_friends_client
+)
+
 
 
