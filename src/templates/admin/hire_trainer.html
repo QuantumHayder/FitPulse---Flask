@@ -10,7 +10,7 @@
         <div class="bg-white overflow-hidden shadow rounded-lg">
             <div class="px-4 py-5 sm:p-6">
                 <dt class="text-sm font-medium text-gray-500">Total Requests</dt>
-                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                <dd id="total-count" class="mt-1 text-3xl font-semibold text-gray-900">
                     {{ trainer_requests|length }}
                 </dd>
             </div>
@@ -25,9 +25,9 @@
         </div>
         <div class="bg-white overflow-hidden shadow rounded-lg">
             <div class="px-4 py-5 sm:p-6">
-                <dt class="text-sm font-medium text-gray-500">Accepted Requests</dt>
-                <dd id="accepted-count" class="mt-1 text-3xl font-semibold text-green-600">
-                    {{ accepted_requests|length }}
+                <dt class="text-sm font-medium text-gray-500">Rejected Requests</dt>
+                <dd id="rejected-count" class="mt-1 text-3xl font-semibold text-red-600">
+                    {{ rejected_requests|length }}
                 </dd>
             </div>
         </div>

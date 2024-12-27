@@ -24,7 +24,7 @@ class ExerciseLog:
             (self.id,),
         )
 
-        return [Exercise(**exercise) for exercise in exercises]
+        return [(Exercise(**exercise), exercise["reps"]) for exercise in exercises]
 
     def insert_exercise(self, exercise: int, reps: int) -> None:
         e = Exercise.get(exercise)
@@ -40,21 +40,23 @@ class ExerciseLog:
         e = Exercise.get(exercise)
         if not e:
             raise ValueError("Cannot update a non-existent exercise to log.")
-        
+
         l = ExerciseLog.get(self.id)
         if not l:
             raise ValueError("Cannot update a non-existent log in ExerciseLogMap.")
-        
+
         exercises_log = db.fetch_query(
-            'SELECT * FROM public."LogExerciseMap" WHERE log = %s AND exercise= %s ', (self.id , exercise)
+            'SELECT * FROM public."LogExerciseMap" WHERE log = %s AND exercise= %s ',
+            (self.id, exercise),
         )
 
         if not exercises_log:
             return None
 
         db.execute_query(
-            'UPDATE public."LogExerciseMap" SET reps = %s WHERE log= %s AND exercise= %s',(reps, self.id , exercise)
-            )
+            'UPDATE public."LogExerciseMap" SET reps = %s WHERE log= %s AND exercise= %s',
+            (reps, self.id, exercise),
+        )
 
     @classmethod
     def get(cls, id: int):
@@ -105,11 +107,7 @@ class ExerciseLog:
 
 
 if __name__ == "__main__":
-    log_entry, exercises = ExerciseLog.get(2)
-    for exercise in exercises:
-        print(exercise)
-    
-    print(log_entry)
+    log, exercises = ExerciseLog.get(7)
 
-
-    log_entry.insert_exercise(600,5)
+    log.insert_exercise(603, 10)
+    log.insert_exercise(605, 2)

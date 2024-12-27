@@ -93,6 +93,11 @@ class WorkoutRequest:
                 trainer,
             ),
         )
+    def get_trainer(self):
+        return Trainer.get(self.trainer)
+    
+    def get_client(self):
+        return Client.get(self.client)
 
     def __str__(self):
         return f"WorkoutRequest(client={self.client}, timestamp={self.timestamp}, trainer={self.trainer}, description={self.description})"

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %} FitPulse | Logs {% endblock title %}
+
+{% block body %}
+<h1 class="text-center text-3xl font-bold mb-6 text-gray-800"> Logs </h1>
+
+{% for log in user_logs %}
+    {% include "components/exercise_log.html" %}
+{% endfor %}
+   
+{% endblock body %}
