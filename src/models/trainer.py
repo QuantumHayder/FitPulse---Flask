@@ -3,7 +3,6 @@ from .trainer_request import Status
 import src.models.workout_request as workout_request
 
 from datetime import date, datetime
-from .client import Client
 
 
 class Trainer(BaseUser):
@@ -12,7 +11,6 @@ class Trainer(BaseUser):
     def __init__(self, email: str, first_name: str, last_name: str, *args, **kwargs):
         super().__init__(email, first_name, last_name, *args, **kwargs)
 
-    
     def get_pending_requests_by_trainer(self):
         requests = [
             r
@@ -20,17 +18,12 @@ class Trainer(BaseUser):
             if r.status == Status.Pending
         ]
         return requests
-        
-    def reject_plan_request(self, plan_id:int) -> None:
+
+    def reject_plan_request(self, plan_id: int) -> None:
         if request := workout_request.WorkoutRequest.get(plan_id):
             print(request)
             request.update_status(Status.Rejected)
 
-    def accept_plan_request(self, plan_id:int) -> None:
+    def accept_plan_request(self, plan_id: int) -> None:
         if request := workout_request.WorkoutRequest.get(plan_id):
             request.update_status(Status.Accepted)
-
-    
-
-        
-

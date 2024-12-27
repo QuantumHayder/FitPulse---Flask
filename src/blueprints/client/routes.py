@@ -9,6 +9,7 @@ from src.models.trainer import Trainer
 from src.models.food_log import FoodLog
 from src.models.base_user import UserRole
 from src.models.exercise_log import ExerciseLog
+from src.models.trainer_request import Status
 
 from datetime import date, datetime
 
@@ -90,7 +91,6 @@ def friends():
                 current_user.send_friend_request(other)
             except Exception as e:
                 return f"<div class='text-red-500'>{e}</div>"
-
             return f"<div class='text-green-500'>Request sent to {other.first_name} {other.last_name}</div>"
         return f"<div class='text-red-500'>No user with the specified email.</div>"
 
@@ -125,9 +125,18 @@ def workout_plan_request():
     trainer = request.args.get("trainer")
     description = request.args.get("description")
 
-    WorkoutRequest.insert(WorkoutRequest(current_user.id, datetime.now(), trainer , description, status='Pending'))
-   
-    success_message = f"<div class='text-green-500'>Workout Request sent successfully!</div>"
+    if not trainer or not description:
+        return f"<div class='text-red-500'>All fields are required!</div>"
+
+    WorkoutRequest.insert(
+        WorkoutRequest(
+            current_user.id, datetime.now(), trainer, description, status=Status.Pending
+        )
+    )
+
+    success_message = (
+        f"<div class='text-green-500'>Workout Request sent successfully!</div>"
+    )
     return success_message, 201
 
 
@@ -147,18 +156,21 @@ def goals():
         return redirect(url_for("base.onboarding"))
 
     if request.method == "GET":
-            return render_template("client/goals.html")
-    
+        return render_template("client/goals.html")
+
     calories = request.form.get("calories")
 
     print(calories)
 
     if not calories:
         return '<div class="text-red-500 text-center my-1">Enter calories!</div>', 200
-    
+
     current_user.update_calories(calories)
 
-    return '<div class="text-green-500 text-center my-1">Updated goal successfully</div>', 200
+    return (
+        '<div class="text-green-500 text-center my-1">Updated goal successfully</div>',
+        200,
+    )
 
 
 @client_bp.route("/enroll_class/<int:class_id>")
