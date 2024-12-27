@@ -156,6 +156,21 @@ def goals():
     return render_template("client/goals.html")
 
 
+@client_bp.route("/enroll_class/<int:class_id>")
+@login_required
+def enroll_class(class_id):
+
+    training_class, _ = TrainingClass.get(class_id)
+
+    if training_class.cost > current_user.points:
+        current_user.points -= training_class.cost
+        print(class_id)
+        current_user.enroll_in_class(class_id)
+        return "Enrolled Successfully."
+
+    return "Could not Enroll in calss."
+
+
 @client_bp.route("/logs")
 @login_required
 def logs():
@@ -167,7 +182,6 @@ def logs():
     user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
 
     return render_template("client/logs.html", user_logs=user_logs)
-    return render_template("dashboard.html", **context)
 
 
 @client_bp.route("/foodLog")

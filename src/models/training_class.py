@@ -53,13 +53,15 @@ class TrainingClass:
     def get_all(cls):
         classes = db.fetch_query('SELECT * FROM public."TrainingClass";')
         return [cls(**training_class) for training_class in classes]
-    
+
     @classmethod
     def avgClassCost(cls):
-        result = db.fetch_query('SELECT AVG(cost) as average_cost FROM public."TrainingClass";')
-        average_cost = result[0]['average_cost'] if result else None
+        result = db.fetch_query(
+            'SELECT AVG(cost) as average_cost FROM public."TrainingClass";'
+        )
+        average_cost = result[0]["average_cost"] if result else None
         return round(average_cost, 2) if average_cost is not None else None
-    
+
     @classmethod
     def insert(cls, training_class: Self) -> None:
         if training_class.title is None:

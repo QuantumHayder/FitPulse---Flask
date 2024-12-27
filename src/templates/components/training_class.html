@@ -31,7 +31,7 @@
 
     {{ primary_button(
         text='Enroll now',
-        href=url_for('auth.register'),
+        href=url_for('client.enroll_class', class_id=training_class.id),
         classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition'
     ) }}
 

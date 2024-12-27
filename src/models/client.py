@@ -3,6 +3,8 @@ from datetime import datetime
 from .base_user import BaseUser, UserRole
 from .trainer_request import Status
 from .friend_request import FriendRequest
+from .training_class import TrainingClass
+from . import db
 
 
 class Client(BaseUser):
@@ -21,6 +23,18 @@ class Client(BaseUser):
         super().__init__(email, first_name, last_name, *args, **kwargs)
         self.points = points
         self.calories = calories
+
+    def update_points(self, points: int):
+        db.execute_query(
+            'UPDATE public."Client" SET points = %s WHERE id = %s;',
+            (points, self.id),
+        )
+
+    def update_calories(self, calories: int):
+        db.execute_query(
+            'UPDATE public."Client" SET calories = %s WHERE id = %s;',
+            (calories, self.id),
+        )
 
     def get_friends(self):
 
@@ -96,6 +110,17 @@ class Client(BaseUser):
 
         FriendRequest.insert(
             FriendRequest(receiver=other.id, sender=self.id, status=Status.Pending)
+        )
+
+    def enroll_in_class(self, class_id: int) -> None:
+        c, _ = TrainingClass.get(class_id)
+
+        if not c:
+            raise ValueError("Class unavailable")
+
+        db.execute_query(
+            'INSERT INTO public."ClientTrainingClassMap" ("training_class", "client") VALUES (%s, %s)',
+            (class_id, self.id),
         )
 
     def __str__(self):
