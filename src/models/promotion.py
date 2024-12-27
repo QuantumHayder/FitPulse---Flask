@@ -1,7 +1,7 @@
 from typing import Self
 
 from . import db
-from .training_class import TrainingClass
+import src.models.training_class as training_class
 from datetime import datetime, time, date
 
 
@@ -21,13 +21,15 @@ class Promotion:
         self.date = date
         self.start = start
         self.duration = duration
-        
+
     @classmethod
     def avgPromotionAmount(cls):
-        result = db.fetch_query('SELECT AVG(amount) as promotion_amount FROM public."Promotion";')
-        average_promotion = result[0]['promotion_amount'] if result else None
+        result = db.fetch_query(
+            'SELECT AVG(amount) as promotion_amount FROM public."Promotion";'
+        )
+        average_promotion = result[0]["promotion_amount"] if result else None
         return round(average_promotion, 2) if average_promotion is not None else None
-    
+
     @classmethod
     def get(cls, training_class: int):
         promotion = db.fetch_query(
@@ -55,9 +57,9 @@ class Promotion:
         if promotion.duration is None:
             raise ValueError("Cannot insert promotion with duration set to NULL.")
 
-        training_class = TrainingClass.get(promotion.training_class)
+        t = training_class.TrainingClass.get(promotion.training_class)
 
-        if training_class is None:
+        if t is None:
             raise ValueError("Cannot assign promotion to non existing training_class.")
 
         try:

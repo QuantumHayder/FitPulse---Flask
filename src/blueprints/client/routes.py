@@ -9,6 +9,7 @@ from src.models.trainer import Trainer
 from src.models.food_log import FoodLog
 from src.models.base_user import UserRole
 from src.models.exercise_log import ExerciseLog
+from src.models.exercise import Exercise
 from src.models.trainer_request import Status
 
 from datetime import date, datetime
@@ -83,18 +84,31 @@ def friends():
     if current_user.role != UserRole.Client:
         return Response("Bad Request", status=201)
 
+    context = {"friend_requests": current_user.get_pending_requests_received()}
+
     if request.method == "GET" and htmx:
         email = request.args.get("search")
         other = Client.get_by_email(email)
         if other:
             try:
                 current_user.send_friend_request(other)
+                message = {
+                    "message": f"Request sent to {other.first_name} {other.last_name}",
+                    "error": False,
+                }
             except Exception as e:
-                return f"<div class='text-red-500'>{e}</div>"
-            return f"<div class='text-green-500'>Request sent to {other.first_name} {other.last_name}</div>"
-        return f"<div class='text-red-500'>No user with the specified email.</div>"
+                message = {
+                    "message": f"{e}",
+                    "error": True,
+                }
+        else:
+            message = {
+                "message": "This person does not exist.",
+                "error": True,
+            }
 
-    context = {"friend_requests": current_user.get_pending_requests_received()}
+        return render_template("partials/friend_search.html", message=message)
+
     return render_template("client/friends.html", **context)
 
 
@@ -107,7 +121,7 @@ def workout_plan():
     clients_requests = WorkoutRequest.get_requests_by_client(current_user.id)
 
     return render_template(
-        "request-workout-plan.html",
+        "client/request-workout-plan.html",
         trainers=Trainer.get_all(),
         clients_request=clients_requests,
     )
@@ -126,7 +140,12 @@ def workout_plan_request():
     description = request.args.get("description")
 
     if not trainer or not description:
-        return f"<div class='text-red-500'>All fields are required!</div>"
+        message = {"message": "All fields are required!", "error": True}
+        return render_template(
+            "partials/workout_plan_request.html",
+            message=message,
+            clients_request=WorkoutRequest.get_requests_by_client(current_user.id),
+        )
 
     WorkoutRequest.insert(
         WorkoutRequest(
@@ -134,10 +153,12 @@ def workout_plan_request():
         )
     )
 
-    success_message = (
-        f"<div class='text-green-500'>Workout Request sent successfully!</div>"
+    message = {"message": "Workout Request sent successfully!", "error": False}
+    return render_template(
+        "partials/workout_plan_request.html",
+        message=message,
+        clients_request=WorkoutRequest.get_requests_by_client(current_user.id),
     )
-    return success_message, 201
 
 
 @client_bp.route("/dashboard")
@@ -184,12 +205,15 @@ def enroll_class(class_id):
 
         try:
             current_user.enroll_in_class(class_id)
+            message = {"message": "Enrolled Successfully.", "error": False}
         except Exception as e:
-            return f"{e}"
+            message = {"message": f"{e}", "error": True}
+    else:
+        message = {"message": "Could not enroll in class", "error": True}
 
-        return "Enrolled Successfully."
-
-    return "Could not Enroll in calss."
+    return render_template(
+        "partials/class_enroll.html", message=message, training_class=training_class
+    )
 
 
 @client_bp.route("/logs")
@@ -202,7 +226,9 @@ def logs():
 
     user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
 
-    return render_template("client/logs.html", user_logs=user_logs)
+    return render_template(
+        "client/logs.html", user_logs=user_logs, exercises=Exercise.get_all()
+    )
 
 
 @client_bp.route("/update-log-reps/<int:log_id>/<int:exercise_id>", methods=["POST"])
@@ -213,6 +239,24 @@ def update_log_reps(log_id, exercise_id):
     log.update_exercise(exercise_id, reps)
 
 
+@client_bp.route("/add-log-exercise/<int:log_id>", methods=["POST"])
+def add_log_exercise(log_id):
+    exercise_id = request.form.get("exercise")
+    try:
+        log, _ = ExerciseLog.get(log_id)
+        log.insert_exercise(exercise_id, 0)
+        message = {"message": "", "error": False}
+    except Exception as e:
+        message = {
+            "message": "Make sure to pick an exercise not in the log.",
+            "error": True,
+        }
+
+    return render_template(
+        "components/log_exercises_table.html", log=log, message=message
+    )
+
+
 @client_bp.route(
     "/delete-log-exercise/<int:log_id>/<int:exercise_id>", methods=["POST"]
 )
@@ -220,6 +264,37 @@ def update_log_reps(log_id, exercise_id):
 def delete_log_exercise(log_id, exercise_id):
     log, _ = ExerciseLog.get(log_id)
     log.delete_exercise(exercise_id)
+    return render_template("components/log_exercises_table.html", log=log)
+
+
+@client_bp.route("/delete-exercise-log/<int:log_id>", methods=["POST"])
+@login_required
+def delete_exercise_log(log_id):
+    ExerciseLog.delete(log_id)
+
+    user_logs = ExerciseLog.get_all(current_user.id)
+    user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
+    return render_template(
+        "components/exercise_log_list.html",
+        user_logs=user_logs,
+        exercises=Exercise.get_all(),
+    )
+
+
+@client_bp.route("/add-exercise-log", methods=["POST"])
+@login_required
+def add_exercise_log():
+    e = ExerciseLog(current_user.id, datetime.now())
+    ExerciseLog.insert(e)
+
+    user_logs = ExerciseLog.get_all(current_user.id)
+    user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
+
+    return render_template(
+        "components/exercise_log_list.html",
+        user_logs=user_logs,
+        exercises=Exercise.get_all(),
+    )
 
 
 @client_bp.route("/foodLog")

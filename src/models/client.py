@@ -9,6 +9,7 @@ from src.models import db
 from .training_class import TrainingClass
 from . import db
 
+
 class Client(BaseUser):
     role: UserRole = UserRole.Client
 
@@ -26,12 +27,10 @@ class Client(BaseUser):
         self.points = points
         self.calories = calories
 
-
     @classmethod
     def get_all(cls):
         classes = db.fetch_query('SELECT * FROM public."Client";')
         return [cls(**training_class) for training_class in classes]
-    
 
     def update_points(self, points: int):
         db.execute_query(
@@ -44,7 +43,6 @@ class Client(BaseUser):
             'UPDATE public."Client" SET calories = %s WHERE id = %s;',
             (calories, self.id),
         )
-
 
     def get_friends(self):
 
@@ -63,15 +61,15 @@ class Client(BaseUser):
         user_ids = list(sent.union(received))
 
         return [Client.get(uid) for uid in user_ids]
-    
+
     @classmethod
     def top_and_bottom_clients(cls):
         # Get all clients
         clients = cls.get_all()
-        
+
         if not clients:
             return None, None  # Return None if no clients are found
-        
+
         # Create a dictionary to store the number of friends for each client
         friends_count = {}
 
@@ -82,14 +80,14 @@ class Client(BaseUser):
 
         # Find the client with the most friends
         top_client = max(friends_count, key=friends_count.get, default=None)
-        
+
         # Find the client with the fewest friends
         bottom_client = min(friends_count, key=friends_count.get, default=None)
 
         # Return the top and bottom clients along with their friend counts
-        return (top_client, friends_count[top_client]) if top_client else None, \
+        return (top_client, friends_count[top_client]) if top_client else None, (
             (bottom_client, friends_count[bottom_client]) if bottom_client else None
-
+        )
 
     def get_pending_requests_received(self):
         user_ids = [
@@ -169,7 +167,7 @@ class Client(BaseUser):
                 (class_id, self.id),
             )
         except Exception:
-            raise ValueError("Already enrolled in the course")
+            raise ValueError("Already enrolled in the class")
 
     def __str__(self):
         return f"Client(id={self.id}, first_name={self.first_name}, last_name={self.last_name}, email={self.email}, points={self.points})"

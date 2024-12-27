@@ -5,8 +5,17 @@
 {% block body %}
 <h1 class="text-center text-3xl font-bold mb-6 text-gray-800"> Logs </h1>
 
-{% for log in user_logs %}
-    {% include "components/exercise_log.html" %}
-{% endfor %}
+<button 
+    hx-post="{{url_for('client.add_exercise_log')}}"
+    hx-target="#exercise-logs"
+    hx-swap="innerHTML"
+    class="text-green-500 hover:underline"
+    >
+    Create New Log
+</button>
+
+<div id="exercise-logs">
+    {% include "components/exercise_log_list.html" %}
+</div>
    
 {% endblock body %}

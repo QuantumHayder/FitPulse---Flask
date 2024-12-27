@@ -14,3 +14,9 @@
 {% else %}
     <p class="text-gray-500 text-center justify-center items-centers">You don't have any pending friend requests.</p>
 {% endif %}
+
+{% if htmx %}
+<div hx-swap-oob="true" id="current-friends" class="max-h-[300px] overflow-y-auto [-ms-overflow-style:'none'] [scrollbar-width:'none'] [&::-webkit-scrollbar]:hidden space-y-3">
+    {% include "components/current_friends_section.html" %}
+</div>
+{% endif %}

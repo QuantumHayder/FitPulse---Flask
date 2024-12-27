@@ -21,7 +21,14 @@
             </svg>
         </div>
         <div class="flex items-center space-x-2">
-            <p class="text-lg font-medium text-gray-800">{{ training_class.cost }}</p>
+            {% with promotion_amount = training_class.get_current_promotion() %}
+                {% if not promotion_amount %}
+                    <p class="text-lg font-medium text-gray-800">{{ training_class.cost }}</p>
+                {% else %}
+                    <p class="text-lg line-through font-medium text-red-800">{{ training_class.cost }}</p>
+                    <p class="text-lg font-medium text-green-800">{{ training_class.cost - promotion_amount }}</p>
+                {% endif %}
+            {% endwith %}
             <svg width="3rem" height="3rem" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 16H13C13.6667 16 15 15.6 15 14C15 12.4 13.6667 12 13 12H11C10.3333 12 9 11.6 9 10C9 8.4 10.3333 8 11 8H12M12 16H9M12 16V18M15 8H12M12 8V6M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
                       stroke="#facc15" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -29,6 +36,7 @@
         </div>
     </div>
 
+    <div id="message-c-{{training_class.id}}"></div>
     {% if current_user.is_enrolled_in_class(training_class.id) %}
         {{ primary_button(
             text='Enrolled!',
@@ -36,10 +44,19 @@
             attrs={"disabled": "true"}
         ) }}
     {% else %}
+        {% set message_id = "#message-c-" + training_class.id|string %}
+        {% set button_id = "button-c-" + training_class.id|string %}
+
         {{ primary_button(
             text='Enroll Now',
-            href=url_for('client.enroll_class', class_id=training_class.id),
-            classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition'
+            attrs={
+                "id": button_id,
+                "hx-get": url_for('client.enroll_class', class_id=training_class.id),
+                "hx-target": message_id,
+                "hx-trigger": "click",
+                "hx-swap": "innerHTML"
+            },
+            classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition cursor-pointer'
         ) }}
     {% endif %}
 

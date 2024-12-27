@@ -19,28 +19,40 @@ from src.models.client import Client
 trainer_bp = Blueprint("trainer", __name__)
 htmx = HTMX(trainer_bp)
 
+
 @trainer_bp.route("/create-training-class", methods=["GET", "POST"])
 @login_required
 def create_class():
     if current_user.role != UserRole.Trainer:
         return Response("Bad Request", 400)
-    
+
     if request.method == "POST":
         title = request.form.get("title")
         description = request.form.get("description")
         date = request.form.get("date")
         time = request.form.get("time")
         duration = request.form.get("duration")
-        cost= request.form.get("cost")
+        cost = request.form.get("cost")
 
-        if not title or not description or not date or not time or not duration or not cost:
+        if (
+            not title
+            or not description
+            or not date
+            or not time
+            or not duration
+            or not cost
+        ):
             return '<div class="text-red-500">All fields are required!</div>', 200
-    
+
         TrainingClass.insert(
-            TrainingClass(current_user.id, date, time, duration, title, description, cost)
+            TrainingClass(
+                current_user.id, date, time, duration, title, description, cost
+            )
         )
 
-        success_message = f"<div class='text-green-500'>Class {title} created successfully!</div>"
+        success_message = (
+            f"<div class='text-green-500'>Class {title} created successfully!</div>"
+        )
         return success_message, 201
     return render_template("trainer/create-training-class.html")
 
@@ -51,9 +63,12 @@ def view_plan_requests():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    clients_requests=WorkoutRequest.get_requests_by_trainer(current_user.id)
-    
-    return render_template("trainer/view-plan-requests.html",clients_request = clients_requests)
+    clients_requests = WorkoutRequest.get_requests_by_trainer(current_user.id)
+
+    return render_template(
+        "trainer/view-plan-requests.html", clients_request=clients_requests
+    )
+
 
 @trainer_bp.route("/accept-plan-request/<int:plan_id>/", methods=["POST"])
 @login_required
@@ -65,11 +80,12 @@ def accept_plan_request(plan_id):
     if plan is None:
         return
 
-    current_user.accept_plan_request(plan)
+    current_user.accept_plan_request(plan_id)
     return render_template(
         "components/friend_request_section.html",
         friend_requests=current_user.get_pending_requests_by_trainer(),
     )
+
 
 @trainer_bp.route("/reject-plan-request/<int:plan_id>", methods=["POST"])
 @login_required
@@ -81,12 +97,11 @@ def reject_plan_request(plan_id):
     if plan is None:
         return
 
-    current_user.reject_plan_request(plan)
+    current_user.reject_plan_request(plan_id)
     return render_template(
         "components/friend_request_section.html",
         plan_requests=current_user.get_pending_requests_by_trainer(),
     )
-
 
 
 @trainer_bp.route("/profile")
@@ -94,10 +109,5 @@ def reject_plan_request(plan_id):
 def profile():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
-    trainer_info=Trainer.get(current_user.id)
+    trainer_info = Trainer.get(current_user.id)
     return render_template("trainer/profile.html", trainer_info=trainer_info)
-
-    
-
-   
-    

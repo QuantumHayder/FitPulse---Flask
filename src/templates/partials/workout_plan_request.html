@@ -1,0 +1,16 @@
+
+<h1 class="text-center
+    {% if message.error %}
+        text-red-500
+    {% else %}
+        text-green-500
+    {% endif %}
+    ">
+    {{message.message}}
+</h1>
+
+{% if htmx %}
+<div hx-swap-oob="true" id="previous-workout-requests">
+    {% include "components/previous_workout_requests.html" %}
+</div>
+{% endif %}
