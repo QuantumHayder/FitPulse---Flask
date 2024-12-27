@@ -1,6 +1,7 @@
 from flask import Blueprint, request, Response, redirect, url_for, render_template
 from flask_login import login_required, current_user
 from flask_htmx import HTMX
+from flask import jsonify
 
 from src.models.training_class import TrainingClass
 from src.models.workout_request import WorkoutRequest
@@ -169,7 +170,8 @@ def dashboard():
     enrolled_classes = current_user.enrolled_classes()
     context = {
         "friend_requests": current_user.get_pending_requests_received(),
-        "enrolled_classes": enrolled_classes  
+        "enrolled_classes": enrolled_classes,
+        "exercises": Exercise.get_all(),
     }
     return render_template("client/dashboard.html", **context)
 
@@ -317,3 +319,12 @@ def trainer_page(trainer_id):
     classes = TrainingClass.get_all_by_trainer(t.id)
 
     return render_template("trainer/trainer_profile.html", trainer=t, classes=classes)
+
+
+@client_bp.route("/get_exercise_data/<int:exercise_id>")
+def get_exercise_data(exercise_id: int):
+    labels, values, exercise = current_user.get_exercise_graph(exercise_id)
+
+    result = {"labels": labels, "values": values, "exercise": exercise.title.title()}
+
+    return jsonify(result)
