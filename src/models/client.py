@@ -3,8 +3,11 @@ from datetime import datetime
 from .base_user import BaseUser, UserRole
 from .trainer_request import Status
 from .friend_request import FriendRequest
+
 from src.models import db
 
+from .training_class import TrainingClass
+from . import db
 
 class Client(BaseUser):
     role: UserRole = UserRole.Client
@@ -23,11 +26,26 @@ class Client(BaseUser):
         self.points = points
         self.calories = calories
 
+
     @classmethod
     def get_all(cls):
         classes = db.fetch_query('SELECT * FROM public."Client";')
         return [cls(**training_class) for training_class in classes]
     
+
+    def update_points(self, points: int):
+        db.execute_query(
+            'UPDATE public."Client" SET points = %s WHERE id = %s;',
+            (points, self.id),
+        )
+
+    def update_calories(self, calories: int):
+        db.execute_query(
+            'UPDATE public."Client" SET calories = %s WHERE id = %s;',
+            (calories, self.id),
+        )
+
+
     def get_friends(self):
 
         received = {
@@ -130,6 +148,28 @@ class Client(BaseUser):
         FriendRequest.insert(
             FriendRequest(receiver=other.id, sender=self.id, status=Status.Pending)
         )
+
+    def is_enrolled_in_class(self, class_id: int) -> bool:
+        k = db.fetch_query(
+            'SELECT * FROM public."ClientTrainingClassMap" WHERE "client" = %s AND "training_class" = %s;',
+            (self.id, class_id),
+        )
+
+        return bool(k)
+
+    def enroll_in_class(self, class_id: int) -> None:
+        c, _ = TrainingClass.get(class_id)
+
+        if not c:
+            raise ValueError("Class unavailable")
+
+        try:
+            db.execute_query(
+                'INSERT INTO public."ClientTrainingClassMap" ("training_class", "client") VALUES (%s, %s)',
+                (class_id, self.id),
+            )
+        except Exception:
+            raise ValueError("Already enrolled in the course")
 
     def __str__(self):
         return f"Client(id={self.id}, first_name={self.first_name}, last_name={self.last_name}, email={self.email}, points={self.points})"

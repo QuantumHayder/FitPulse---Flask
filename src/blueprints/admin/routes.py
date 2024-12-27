@@ -212,6 +212,7 @@ def create_promotion(class_id: int):
     
     p = Promotion(amount,date,start,duration,training_class)
     Promotion.insert(p)
+    return '<div class="text-green-500">Promotion created succesfully!</div>', 200
 
 @admin_bp.route("/admin-dashboard")
 @login_required

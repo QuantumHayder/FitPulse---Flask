@@ -147,13 +147,44 @@ def dashboard():
     return render_template("client/dashboard.html", **context)
 
 
-@client_bp.route("/goals")
+@client_bp.route("/goals", methods=["GET", "POST"])
 @login_required
 def goals():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    return render_template("client/goals.html")
+    if request.method == "GET":
+            return render_template("client/goals.html")
+    
+    calories = request.form.get("calories")
+
+    print(calories)
+
+    if not calories:
+        return '<div class="text-red-500 text-center my-1">Enter calories!</div>', 200
+    
+    current_user.update_calories(calories)
+
+    return '<div class="text-green-500 text-center my-1">Updated goal successfully</div>', 200
+
+
+@client_bp.route("/enroll_class/<int:class_id>")
+@login_required
+def enroll_class(class_id):
+
+    training_class, _ = TrainingClass.get(class_id)
+
+    if training_class.cost <= current_user.points:
+        current_user.update_points(current_user.points - training_class.cost)
+
+        try:
+            current_user.enroll_in_class(class_id)
+        except Exception as e:
+            return f"{e}"
+
+        return "Enrolled Successfully."
+
+    return "Could not Enroll in calss."
 
 
 @client_bp.route("/logs")
@@ -167,7 +198,23 @@ def logs():
     user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
 
     return render_template("client/logs.html", user_logs=user_logs)
-    return render_template("dashboard.html", **context)
+
+
+@client_bp.route("/update-log-reps/<int:log_id>/<int:exercise_id>", methods=["POST"])
+@login_required
+def update_log_reps(log_id, exercise_id):
+    reps = request.form.get("reps")
+    log, _ = ExerciseLog.get(log_id)
+    log.update_exercise(exercise_id, reps)
+
+
+@client_bp.route(
+    "/delete-log-exercise/<int:log_id>/<int:exercise_id>", methods=["POST"]
+)
+@login_required
+def delete_log_exercise(log_id, exercise_id):
+    log, _ = ExerciseLog.get(log_id)
+    log.delete_exercise(exercise_id)
 
 
 @client_bp.route("/foodLog")
@@ -180,3 +227,12 @@ def food_log():
     logs.sort(key=lambda l: l.timestamp, reverse=True)
     print(logs)
     return render_template("client/foodLog.html", logs=logs)
+
+
+@client_bp.route("/trainer/<int:trainer_id>")
+@login_required
+def trainer_page(trainer_id):
+    t = Trainer.get(trainer_id)
+    classes = TrainingClass.get_all_by_trainer(t.id)
+
+    return render_template("trainer/trainer_profile.html", trainer=t, classes=classes)

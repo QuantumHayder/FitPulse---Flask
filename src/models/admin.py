@@ -10,6 +10,6 @@ class Admin(BaseUser):
         
         
         
-#a = Admin("a@gmail.com","a","b")
-#a.set_password("aaaa@aaaa")
-#Admin.insert(a)
+# a = Admin("abdallahahmed.wrk@gmail.com","a","b")
+# a.set_password("123")
+# Admin.insert(a)
