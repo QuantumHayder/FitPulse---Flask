@@ -21,7 +21,6 @@ class Trainer(BaseUser):
 
     def reject_plan_request(self, plan_id: int) -> None:
         if request := workout_request.WorkoutRequest.get(plan_id):
-            print(request)
             request.update_status(Status.Rejected)
 
     def accept_plan_request(self, plan_id: int) -> None:

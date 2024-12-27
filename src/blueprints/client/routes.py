@@ -181,8 +181,6 @@ def goals():
 
     calories = request.form.get("calories")
 
-    print(calories)
-
     if not calories:
         return '<div class="text-red-500 text-center my-1">Enter calories!</div>', 200
 
@@ -305,7 +303,6 @@ def food_log():
 
     logs = FoodLog.get_all(current_user.id)
     logs.sort(key=lambda l: l.timestamp, reverse=True)
-    print(logs)
     return render_template("client/foodLog.html", logs=logs)
 
 

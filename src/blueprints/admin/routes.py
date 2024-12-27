@@ -186,13 +186,17 @@ def create_admin():
 def manage_promotion():
     if current_user.role != UserRole.Admin:
         return Response("Bad Request", 400)
-    
+
     title = request.args.get("title")
     training_classes = TrainingClass.search(title=title)
 
     if htmx:
-        return render_template("partials/training_class_promotion.html", training_classes=training_classes)
-    return render_template("admin/manage_promotion.html", training_classes = training_classes)
+        return render_template(
+            "partials/training_class_promotion.html", training_classes=training_classes
+        )
+    return render_template(
+        "admin/manage_promotion.html", training_classes=training_classes
+    )
 
 
 @admin_bp.route("/create-promotion/<int:class_id>", methods=["GET", "POST"])
@@ -200,7 +204,7 @@ def manage_promotion():
 def create_promotion(class_id: int):
     if current_user.role != UserRole.Admin:
         return Response("Bad Request", 400)
-    
+
     amount = request.form.get("amount")
     date = request.form.get("date")
     start = request.form.get("start")
@@ -209,51 +213,48 @@ def create_promotion(class_id: int):
 
     if not amount or not date or not start or not duration or not training_class:
         return '<div class="text-red-500">All fields are required!</div>', 200
-    
+
     try:
-        p = Promotion(amount,date,start,duration,training_class)
+        p = Promotion(amount, date, start, duration, training_class)
         Promotion.insert(p)
     except Exception as e:
         return f'<div class="text-red-500">{e}</div>', 200
-    
+
     return '<div class="text-green-500">Promotion created succesfully!</div>', 200
+
 
 @admin_bp.route("/admin-dashboard")
 @login_required
 def dashboard():
-    
+
     adminCount = Admin.count_all()
     trainerCount = Trainer.count_all()
     clientCount = Client.count_all()
-    
+
     rejectedTrainerRequest = TrainerRequest.count_rejected()
     pendingTrainerRequest = TrainerRequest.count_pending()
-    
+
     avg_class_cost = TrainingClass.avg_class_cost()
     avgPromAmount = Promotion.avgPromotionAmount()
-    
-    top_class,top_trainer, bottom_class, bottom_trainer = TrainingClass.class_and_trainer()
+
+    top_class, top_trainer, bottom_class, bottom_trainer = (
+        TrainingClass.class_and_trainer()
+    )
     top_friends_client, bottom_friends_client = Client.top_and_bottom_clients()
-    print(top_friends_client)
-    print(bottom_friends_client)
-    
-    
+
     return render_template(
-    "admin/dashboard.html",
-    adminCount=adminCount,
-    trainerCount=trainerCount,
-    avgPromAmount=avgPromAmount,
-    clientCount=clientCount,
-    rejectedTrainerRequest=rejectedTrainerRequest,
-    pendingTrainerRequest=pendingTrainerRequest,
-    avg_class_cost=avg_class_cost,
-    top_class=top_class,
-    top_trainer=top_trainer,
-    bottom_class=bottom_class,
-    bottom_trainer=bottom_trainer,
-    top_friends_client=top_friends_client,
-    bottom_friends_client=bottom_friends_client
-)
-
-
-
+        "admin/dashboard.html",
+        adminCount=adminCount,
+        trainerCount=trainerCount,
+        avgPromAmount=avgPromAmount,
+        clientCount=clientCount,
+        rejectedTrainerRequest=rejectedTrainerRequest,
+        pendingTrainerRequest=pendingTrainerRequest,
+        avg_class_cost=avg_class_cost,
+        top_class=top_class,
+        top_trainer=top_trainer,
+        bottom_class=bottom_class,
+        bottom_trainer=bottom_trainer,
+        top_friends_client=top_friends_client,
+        bottom_friends_client=bottom_friends_client,
+    )

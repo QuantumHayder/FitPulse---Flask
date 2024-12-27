@@ -28,7 +28,3 @@ def fetch_query(query, params=None):
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute(query, params)
             return cur.fetchall()
-
-
-if __name__ == "__main__":
-    print(fetch_query('SELECT * FROM public."Client";'))
