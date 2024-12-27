@@ -92,10 +92,14 @@
                 <div class="px-4 py-5 sm:p-6">
                     <dt class="text-sm font-medium text-gray-500">{{ label }}</dt>
                     <dd class="mt-1 text-3xl font-semibold text-violet-600">
-                        {% if entity.first_name %}
-                            {{ entity.first_name }} {{ entity.last_name }}
+                        {% if entity is not none %}
+                            {% if label.endswith("Trainer") %}
+                                {{ entity.first_name }} {{ entity.last_name }}
+                            {% elif label.endswith("Class") %}
+                                {{ entity.title }}{{ " - " + entity.description if entity.description else "" }}
+                            {% endif %}
                         {% else %}
-                            {{ entity.title }} {{ entity.description }}
+                            No Data Available
                         {% endif %}
                     </dd>
                 </div>
@@ -103,5 +107,7 @@
             {% endfor %}
         </div>
     </section>
+    
+    
 </div>
 {% endblock body %}

@@ -234,9 +234,6 @@ def dashboard():
     
     top_class,top_trainer, bottom_class, bottom_trainer = TrainingClass.class_and_trainer()
     top_friends_client, bottom_friends_client = Client.top_and_bottom_clients()
-    print(top_friends_client)
-    print(bottom_friends_client)
-    
     
     return render_template(
     "admin/dashboard.html",
@@ -247,10 +244,10 @@ def dashboard():
     rejectedTrainerRequest=rejectedTrainerRequest,
     pendingTrainerRequest=pendingTrainerRequest,
     avg_class_cost=avg_class_cost,
-    top_class=top_class,
-    top_trainer=top_trainer,
-    bottom_class=bottom_class,
-    bottom_trainer=bottom_trainer,
+    top_class=top_class or "No data",
+    top_trainer=top_trainer or "No data",
+    bottom_class=bottom_class or "No data",
+    bottom_trainer=bottom_trainer or "No data",
     top_friends_client=top_friends_client,
     bottom_friends_client=bottom_friends_client
 )

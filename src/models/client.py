@@ -148,6 +148,43 @@ class Client(BaseUser):
         FriendRequest.insert(
             FriendRequest(receiver=other.id, sender=self.id, status=Status.Pending)
         )
+        
+    def enrolled_classes(self):
+        # Query to get all training class ids the client is enrolled in
+        k = db.fetch_query(
+            '''
+            SELECT "TrainingClass".id
+            FROM public."ClientTrainingClassMap"
+            JOIN public."TrainingClass" 
+            ON "ClientTrainingClassMap".training_class = "TrainingClass".id
+            WHERE "ClientTrainingClassMap".client = %s;
+            ''',
+            (self.id,)
+        )
+
+        # If no classes are found, return an empty list
+        if not k:
+            return []
+
+        # List to hold the enrolled classes with their trainers
+        enrolled_classes = []
+
+        # Loop through the list of class ids and fetch each class and its trainer
+        for class_item in k:
+            class_id = class_item[0]
+            
+            # Call the get function for the class to fetch both class and trainer objects
+            training_class, trainer = TrainingClass.get(class_id)
+
+            # Append the class and trainer objects to the enrolled_classes list
+            enrolled_classes.append({
+                "training_class": training_class,
+                "trainer": trainer
+            })
+
+        return enrolled_classes
+
+
 
     def is_enrolled_in_class(self, class_id: int) -> bool:
         k = db.fetch_query(

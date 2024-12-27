@@ -145,7 +145,11 @@ def dashboard():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    context = {"friend_requests": current_user.get_pending_requests_received()}
+    enrolled_classes = current_user.enrolled_classes()
+    context = {
+        "friend_requests": current_user.get_pending_requests_received(),
+        "enrolled_classes": enrolled_classes  
+    }
     return render_template("client/dashboard.html", **context)
 
 

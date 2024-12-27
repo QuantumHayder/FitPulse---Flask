@@ -40,6 +40,7 @@ class TrainingClass:
             return 0
 
         return classes[0]["count"]
+    
 
     @classmethod
     def get(cls, id: int):
@@ -86,21 +87,24 @@ class TrainingClass:
         SELECT training_class, COUNT(client) as client_count 
         FROM public."ClientTrainingClassMap" 
         GROUP BY training_class 
-        ORDER BY client_count DESC
-        LIMIT 1;
+        ORDER BY client_count DESC;
     '''
         result = db.fetch_query(query)
         if not result:
-            return None
+            return None,None,None,None
         best_class_id = result[0][0]
-        worst_class_id = result[-1][-1]
-        best_training_class,best_trainer = TrainingClass.get(best_class_id)
-        worst_training_class,worst_trainer = TrainingClass.get(worst_class_id)
+        worst_class_id = result[-1][0]
+        #-1,0
+        best_training_class,best_trainer = TrainingClass.get(best_class_id)  or (None, None)
+        worst_training_class,worst_trainer = TrainingClass.get(worst_class_id)  or (None, None)
         
         if best_training_class and worst_training_class:
             return best_training_class, best_trainer, worst_training_class, worst_trainer
         else:
-            return None
+           best_training_class, best_trainer, worst_training_class, worst_trainer = None, None, None, None
+           return best_training_class, best_trainer, worst_training_class, worst_trainer
+           
+
     
     @classmethod
     def insert(cls, training_class: Self) -> None:

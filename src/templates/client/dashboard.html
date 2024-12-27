@@ -1,92 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %} FitPulse | Dashbaord {% endblock title %}
+{% block title %} FitPulse | Admin Dashboard {% endblock title %}
 
 {% block body %}
-<h1 class="text-center text-3xl font-bold mb-6 text-gray-800">Dashboard</h1>
-
-<div class="p-6 max-w-7xl mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:border-violet-200 transition-all duration-200">
-                <div class="p-6">
-                    <h2 class="text-lg font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Statistics</h2>
-                    <div class="mt-4 space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <div class="text-2xl font-bold text-violet-600">+12%</div>
-                                <div class="text-sm text-gray-600">Weekly Progress</div>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <div class="text-2xl font-bold text-indigo-600">75%</div>
-                                <div class="text-sm text-gray-600">Goals Met</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Enrolled Classes -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:border-violet-200 transition-all duration-200">
-                <div class="p-6">
-                    <h2 class="text-lg font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Enrolled Classes</h2>
-                    <div class="mt-4 space-y-4">
-                        <div class="relative pl-4 border-l-2 border-violet-500">
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <p class="font-medium text-gray-700">Next Class:</p>
-                                <p class="text-lg text-gray-800">Body Weight Basics</p>
-                                <p class="text-sm text-gray-500">Tomorrow 10:00 AM</p>
-                                <div class="mt-2 flex space-x-2">
-                                    <button class="text-violet-600 hover:text-violet-700 text-sm">View Details</button>
-                                    <button onclick="openModal('scheduleModal')" class="text-violet-600 hover:text-violet-700 text-sm">Full Schedule</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Workout Plan Requests -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:border-violet-200 transition-all duration-200">
-                <div class="p-6">
-                    <h2 class="text-lg font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Workout Plan Requests</h2>
-                    <div class="mt-4">
-                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-medium text-gray-700">Weight Loss Plan</p>
-                                    <p class="text-sm text-gray-500">Requested: Dec 24</p>
-                                </div>
-                                <span class="text-xs bg-violet-50 text-violet-600 px-2 py-1 rounded-full">Pending</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+    <h2 class="text-3xl font-bold mb-6 text-center text-indigo-600">Client Dashboard</h2>
     
+    <!-- Grid layout for splitting the page into two halves -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-            <!-- Workout Plan -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:border-violet-200 transition-all duration-200">
-                <div class="p-6">
-                    <h2 class="text-lg font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Workout Plan</h2>
-                    <div class="mt-4">
-                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                            <div class="flex justify-between items-center mb-2">
-                                <p class="font-medium text-gray-700">Strength Training</p>
-                                <span class="text-xs bg-violet-50 text-violet-600 px-2 py-1 rounded-full">Week 2/12</span>
-                            </div>
-                            <div class="relative pt-1">
-                                <div class="overflow-hidden h-2 text-xs flex rounded-full bg-gray-100">
-                                    <div class="w-1/6 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full"></div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Left section for the table displaying enrolled classes -->
+        <div class="lg:col-span-1">
+            <!-- Section for Enrolled Classes -->
+            <div class="bg-white shadow rounded-lg p-6 mb-8">
+                <h3 class="text-2xl font-bold text-indigo-600 mb-4">Enrolled Classes</h3>
+                {% if enrolled_classes %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-auto bg-white border border-gray-200 rounded-lg shadow-lg">
+                            <thead class="bg-indigo-600 text-white">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-sm font-medium">Class Title</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium">Duration (min)</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium">Cost</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium">Trainer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enrollment in enrolled_classes %}
+                                    <tr class="border-b">
+                                        <td class="px-6 py-3 text-sm text-gray-800">{{ enrollment.training_class.title }}</td>
+                                        <td class="px-6 py-3 text-sm text-gray-800">{{ enrollment.training_class.duration }}</td>
+                                        <td class="px-6 py-3 text-sm text-gray-800">${{ enrollment.training_class.cost }}</td>
+                                        <td class="px-6 py-3 text-sm text-gray-800">
+                                            {{ enrollment.trainer.first_name }} {{ enrollment.trainer.last_name }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
+                {% else %}
+                    <p class="text-gray-500">You are not enrolled in any classes yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right section for displaying points in a card -->
+        <div class="lg:col-span-1">
+            <!-- Section for User Points -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-2xl font-bold text-indigo-600 mb-4">Your Points</h3>
+                <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4">
+                    <p class="text-lg font-medium text-indigo-800">You currently have:</p>
+                    <p class="text-3xl font-bold text-indigo-600">{{ current_user.points }} points</p>
                 </div>
             </div>
         </div>
+        
     </div>
-
 
 {% endblock body %}
