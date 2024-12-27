@@ -70,7 +70,6 @@ def training_class_search():
         trainer_id = None
 
     training_classes = TrainingClass.search(title=title, trainer=trainer_id)
-    
 
     return render_template(
         "partials/training_class_table.html", training_classes=training_classes
@@ -87,12 +86,17 @@ def friends():
         email = request.args.get("search")
         other = Client.get_by_email(email)
         if other:
-            current_user.send_friend_request(other)
+            try:
+                current_user.send_friend_request(other)
+            except Exception as e:
+                return f"<div class='text-red-500'>{e}</div>"
+
             return f"<div class='text-green-500'>Request sent to {other.first_name} {other.last_name}</div>"
         return f"<div class='text-red-500'>No user with the specified email.</div>"
 
     context = {"friend_requests": current_user.get_pending_requests_received()}
     return render_template("client/friends.html", **context)
+
 
 @client_bp.route("/request-workout-plan")
 @login_required
@@ -100,10 +104,12 @@ def workout_plan():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    clients_requests=WorkoutRequest.get_requests_by_client(current_user.id)
+    clients_requests = WorkoutRequest.get_requests_by_client(current_user.id)
 
     return render_template(
-        "request-workout-plan.html",trainers=Trainer.get_all() ,  clients_request = clients_requests
+        "request-workout-plan.html",
+        trainers=Trainer.get_all(),
+        clients_request=clients_requests,
     )
 
 
@@ -118,22 +124,22 @@ def workout_plan_request():
 
     trainer = request.args.get("trainer")
     description = request.args.get("description")
-    
-    if not description or not trainer:
-            return '<div class="text-red-500">All fields are required!</div>', 200
 
-    WorkoutRequest.insert(WorkoutRequest(current_user.id, datetime.now(), trainer , description))
-   
-    success_message = f"<div class='text-green-500'>Workout Request sent successfully!</div>"
+    if not description or not trainer:
+        return '<div class="text-red-500">All fields are required!</div>', 200
+
+    WorkoutRequest.insert(
+        WorkoutRequest(current_user.id, datetime.now(), trainer, description)
+    )
+
+    success_message = (
+        f"<div class='text-green-500'>Workout Request sent successfully!</div>"
+    )
     return success_message, 201
 
 
-
-
 @client_bp.route("/dashboard")
-@client_bp.route("/friendRequests")
-@login_required
-def friendrequests():
+def dashboard():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
@@ -163,14 +169,14 @@ def logs():
     return render_template("client/logs.html", user_logs=user_logs)
     return render_template("dashboard.html", **context)
 
+
 @client_bp.route("/foodLog")
 @login_required
 def food_log():
     if current_user.role != UserRole.Client:
-         return redirect(url_for("base.onboarding"))
-    
+        return redirect(url_for("base.onboarding"))
+
     logs = FoodLog.get_all(current_user.id)
     logs.sort(key=lambda l: l.timestamp, reverse=True)
     print(logs)
     return render_template("client/foodLog.html", logs=logs)
-
