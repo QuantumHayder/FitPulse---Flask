@@ -107,11 +107,8 @@ class FoodLog:
         )
 
 if __name__ == "__main__":
-    log_entry, foods = FoodLog.get(1)
-    for food in foods:
-        print(food)
     
-    print(log_entry)
+    f= FoodLog(20, datetime.now())
+    FoodLog.insert(f)
 
-
-    log_entry.update_food(100,10)
+    #log_entry.update_food(100,10)

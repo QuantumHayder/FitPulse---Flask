@@ -6,6 +6,7 @@ from src.models.training_class import TrainingClass
 from src.models.workout_request import WorkoutRequest
 from src.models.client import Client
 from src.models.trainer import Trainer
+from src.models.food_log import FoodLog
 from src.models.base_user import UserRole
 from src.models.exercise_log import ExerciseLog
 
@@ -130,8 +131,9 @@ def workout_plan_request():
 
 
 @client_bp.route("/dashboard")
+@client_bp.route("/friendRequests")
 @login_required
-def dashboard():
+def friendrequests():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
@@ -159,3 +161,16 @@ def logs():
     user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
 
     return render_template("client/logs.html", user_logs=user_logs)
+    return render_template("dashboard.html", **context)
+
+@client_bp.route("/foodLog")
+@login_required
+def food_log():
+    if current_user.role != UserRole.Client:
+         return redirect(url_for("base.onboarding"))
+    
+    logs = FoodLog.get_all(current_user.id)
+    logs.sort(key=lambda l: l.timestamp, reverse=True)
+    print(logs)
+    return render_template("client/foodLog.html", logs=logs)
+

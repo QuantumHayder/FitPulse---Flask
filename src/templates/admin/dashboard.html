@@ -1,9 +1,90 @@
 {% extends "base.html" %}
-
-{% block title %} Admin | Dashboard {% endblock title %}
+{% block title %} FitPulse | Admin DashBoard {% endblock title %}
 
 {% block body %}
 <div class="container mx-auto p-4">
     <h1 class="text-4xl font-extrabold text-gray-900 text-center mb-8">Dashboard</h1>
+
+<div class="flex-container">
+    <div class="flex flex-row w-full justify-evenly">
+        <div class="flex flex-col">
+            <h1 class="text-left text-3xl font-bold mb-3 text-gray-800"> Users Counts</h1>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8"> 
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500">Admins Count</dt>
+                        <dd id="adminCount" class="mt-1 text-3xl font-semibold text-violet-600">
+                            {{ adminCount }}
+                        </dd>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500"> Trainers Count </dt>
+                        <dd id="trainerCount" class="mt-1 text-3xl font-semibold text-violet-600">
+                            {{ trainerCount }}
+                        </dd>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500"> Clients Count</dt>
+                        <dd id="clientCount" class="mt-1 text-3xl font-semibold text-violet-600">
+                            {{ clientCount }}
+                        </dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <h1 class="text-left text-3xl font-bold mb-3 text-gray-800"> Trainer Requests</h1>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8"> 
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500">Rejected Requets</dt>
+                        <dd id="rejectedTrainerRequest" class="mt-1 text-3xl font-semibold text-violet-600">
+                            {{ rejectedTrainerRequest }}
+                        </dd>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500"> Pending Requests</dt>
+                        <dd id="pendingTrainerRequest" class="mt-1 text-3xl font-semibold text-violet-600">
+                            {{ pendingTrainerRequest }}
+                        </dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-row justify-evenly w-full">
+        <div class="flex flex-col">
+            <h1 class="text-left text-3xl font-bold mb-3 text-gray-800"> Training Class </h1>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8"> 
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500"> Average Class Cost</dt>
+                        <dd id="avgClassCost" class="mt-1 text-3xl font-semibold text-violet-600">
+                            {{ avgClassCost }}
+                        </dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <h1 class="text-left text-3xl font-bold mb-3 text-gray-800"> Promotions </h1>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8"> 
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500"> Average Promotion Amount</dt>
+                        <dd id="avgClassCost" class="mt-1 text-3xl font-semibold text-violet-600">
+                            {{ avgPromotionAmount }}
+                        </dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock body %}

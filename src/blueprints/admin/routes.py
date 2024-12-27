@@ -15,7 +15,11 @@ from src.models.base_user import UserRole
 from src.models.user import User
 from src.models.admin import Admin
 from src.models.trainer import Trainer
+from src.models.training_class import TrainingClass
+from src.models.client import Client
+from src.models.promotion import Promotion
 from src.models.food import Food
+from src.models.food_log import FoodLog
 from src.models.trainer_request import TrainerRequest, Status
 from src.models.training_class import TrainingClass
 from src.models.promotion import Promotion
@@ -216,3 +220,19 @@ def dashboard():
         return Response("Bad Request", 400)
 
     return render_template("admin/dashboard.html")
+@admin_bp.route("/dashboard")
+@login_required
+def dashboard():
+    adminCount = Admin.count_all()
+    trainerCount = Trainer.count_all()
+    clientCount = Client.count_all()
+    rejectedTrainerRequest = TrainerRequest.count_rejected()
+    pendingTrainerRequest = TrainerRequest.count_pending()
+    avgClassCost = TrainingClass.avgClassCost()
+    avgPromotionAmount = Promotion.avgPromotionAmount()
+    return render_template("admin/dashboard.html", adminCount=adminCount, trainerCount=trainerCount,
+    clientCount=clientCount,rejectedTrainerRequest=rejectedTrainerRequest,pendingTrainerRequest=pendingTrainerRequest,
+    avgClassCost=avgClassCost)
+    
+
+

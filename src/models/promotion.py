@@ -21,7 +21,14 @@ class Promotion:
         self.date = date
         self.start = start
         self.duration = duration
-
+        
+    @classmethod
+    def avgPromotionAmount(cls):
+        result = db.fetch_query('SELECT AVG(amount) as promotion_amount FROM public."Promotion";')
+        average_promotion = result[0]['promotion_amount'] if result else None
+        return round(average_promotion, 2) if average_promotion is not None else None
+    
+    @classmethod
     def get(cls, training_class: int):
         promotion = db.fetch_query(
             'SELECT * FROM public."Promotion" WHERE training_class = %s',

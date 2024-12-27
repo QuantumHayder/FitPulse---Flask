@@ -83,6 +83,21 @@ class TrainerRequest:
         )
 
         return [(cls(**r), User(**r)) for r in requests]
+    
+    @classmethod
+    def count_rejected(cls):
+        requests = db.fetch_query(
+            f'SELECT COUNT(*) as count FROM public."TrainerRequest" WHERE status = %s;', (Status.Rejected,)
+        )
+        return requests[0]['count'] if requests else 0
+    @classmethod
+    def count_pending(cls):
+        requests = db.fetch_query(
+            f'SELECT COUNT(*) as count FROM public."TrainerRequest" WHERE status = %s;', (Status.Pending,)
+        )
+        return requests[0]['count'] if requests else 0
+
+
 
     @classmethod
     def insert(cls, trainer_request: Self) -> None:
