@@ -10,7 +10,6 @@ from flask import (
 from flask_login import login_required, current_user
 from flask_htmx import HTMX
 
-
 from src.blueprints.auth.routes import validate_password
 from src.models.base_user import UserRole
 from src.models.user import User
@@ -18,6 +17,8 @@ from src.models.admin import Admin
 from src.models.trainer import Trainer
 from src.models.food import Food
 from src.models.trainer_request import TrainerRequest, Status
+from src.models.training_class import TrainingClass
+from src.models.promotion import Promotion
 
 admin_bp = Blueprint("admin", __name__)
 htmx = HTMX(admin_bp)
@@ -181,9 +182,32 @@ def create_admin():
 def manage_promotion():
     if current_user.role != UserRole.Admin:
         return Response("Bad Request", 400)
+    
+    title = request.args.get("title")
+    training_classes = TrainingClass.search(title=title)
 
-    return render_template("admin/manage_promotion.html")
+    if htmx:
+        return render_template("partials/training_class_promotion.html", training_classes=training_classes)
+    return render_template("admin/manage_promotion.html", training_classes = training_classes)
 
+
+@admin_bp.route("/create-promotion/<int:class_id>", methods=["GET", "POST"])
+@login_required
+def create_promotion(class_id: int):
+    if current_user.role != UserRole.Admin:
+        return Response("Bad Request", 400)
+    
+    amount = request.form.get("amount")
+    date = request.form.get("date")
+    start = request.form.get("start")
+    duration = request.form.get("duration")
+    training_class = class_id
+
+    if not amount or not date or not start or not duration or not training_class:
+        return '<div class="text-red-500">All fields are required!</div>', 200
+    
+    p = Promotion(amount,date,start,duration,training_class)
+    Promotion.insert(p)
 
 @admin_bp.route("/admin-dashboard", methods=["GET"])
 @login_required
