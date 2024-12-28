@@ -217,7 +217,7 @@ def enroll_class(class_id):
         promotion = training_class.get_current_promotion()
         if promotion:
             current_user.update_points(
-                max(current_user.points - training_class.cost - promotion, 0)
+                max(current_user.points - (training_class.cost - promotion), 0)
             )
         else:
             current_user.update_points(
