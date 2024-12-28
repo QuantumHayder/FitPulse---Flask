@@ -62,7 +62,7 @@ class WorkoutPlan:
     @classmethod
     def get_client_workouts(cls, client_id: int):
         workouts = db.fetch_query(
-            'SELECT * FROM public."WorkoutPlan" WHERE client_id = %s;', (client_id,)
+            'SELECT * FROM public."WorkoutPlan" WHERE client = %s;', (client_id,)
         )
         return [cls(**workout) for workout in workouts]
 
@@ -72,6 +72,9 @@ class WorkoutPlan:
             'SELECT * FROM public."WorkoutPlan" WHERE trainer_id = %s;', (trainer_id,)
         )
         return [cls(**workout) for workout in workouts]
+
+    def get_trainer(self):
+        return Trainer.get(self.trainer)
 
     @classmethod
     def insert(cls, workout: Self) -> None:
@@ -108,6 +111,12 @@ class WorkoutPlan:
     @classmethod
     def delete(cls, id: int) -> None:
         db.execute_query('DELETE FROM public."WorkoutPlan" WHERE id = %s;', (id,))
+
+    @classmethod
+    def toggle_active(cls, id: int) -> None:
+        db.execute_query(
+            'UPDATE "WorkoutPlan" SET is_active = NOT is_active WHERE id = %s', (id,)
+        )
 
     def __str__(self):
         return f"WorkoutPlan(id={self.id}, trainer={self.trainer}, client={self.client}, is_active={self.is_active}, name={self.name}, description={self.description})"

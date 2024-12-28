@@ -4,19 +4,16 @@ from flask import (
     redirect,
     url_for,
     render_template,
-    flash,
     Response,
 )
-from flask_login import login_required, current_user, logout_user, login_user
+from flask_login import login_required, current_user
 from flask_htmx import HTMX
 
+from src.models.exercise import Exercise
 from src.models.base_user import UserRole
-from src.models.workout_request import WorkoutRequest
 from src.models.workout_plan import WorkoutPlan
 from src.models.training_class import TrainingClass
-from src.models.trainer import Trainer
-from src.models.exercise import Exercise
-from src.models.client import Client
+from src.models.workout_request import WorkoutRequest
 
 trainer_bp = Blueprint("trainer", __name__)
 htmx = HTMX(trainer_bp)
@@ -36,14 +33,7 @@ def create_class():
         duration = request.form.get("duration")
         cost = request.form.get("cost")
 
-        if (
-            not title
-            or not description
-            or not date
-            or not time
-            or not duration
-            or not cost
-        ):
+        if not all(title, description, date, time, duration, cost):
             return '<div class="text-red-500">All fields are required!</div>', 200
 
         TrainingClass.insert(
@@ -103,7 +93,11 @@ def accept_plan_request(workout_request_id, client_id):
     exercises = request.form.getlist("exercises")
 
     if not all((title, description, exercises)):
-        return "ERROR"
+        return render_template(
+            "partials/workout-requests-table.html",
+            clients_request=current_user.get_pending_requests_by_trainer(),
+            message="All fields are required.",
+        )
 
     current_user.accept_plan_request(workout_request_id)
 
@@ -123,7 +117,7 @@ def accept_plan_request(workout_request_id, client_id):
 
     return render_template(
         "partials/workout-requests-table.html",
-        client_requests=pending_requests,
+        clients_request=pending_requests,
     )
 
 
@@ -142,7 +136,7 @@ def reject_plan_request(workout_request_id):
     pending_requests = current_user.get_pending_requests_by_trainer()
     return render_template(
         "partials/workout-requests-table.html",
-        client_requests=pending_requests,
+        clients_request=pending_requests,
     )
 
 
@@ -151,4 +145,5 @@ def reject_plan_request(workout_request_id):
 def profile():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
-    return render_template("trainer/profile.html")
+    classes = TrainingClass.get_all_by_trainer(current_user.id)
+    return render_template("trainer/profile.html", classes=classes)

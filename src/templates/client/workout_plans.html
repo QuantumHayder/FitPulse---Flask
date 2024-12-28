@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %} Fitpulse | Workouts {% endblock title %}
+
+{% block body %}
+    {% for workout_plan in workout_plans %}
+        {% with exercises = workout_plan.get_exercises(), client = current_user, trainer = workout_plan.get_trainer() %}
+            {% include "components/workout_plan.html" %}
+        {% endwith %}
+    {% endfor %}
+    
+{% endblock body %}

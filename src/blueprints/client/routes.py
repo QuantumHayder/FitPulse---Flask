@@ -12,6 +12,7 @@ from src.models.base_user import UserRole
 from src.models.exercise_log import ExerciseLog
 from src.models.exercise import Exercise
 from src.models.trainer_request import Status
+from src.models.workout_plan import WorkoutPlan
 
 from datetime import date, datetime
 
@@ -185,7 +186,9 @@ def goals():
 
     # Process and fetch user achievements
     current_user.process_user_achievements()  # This will update achievements based on the logs
-    user_achievements = current_user.get_user_achievements()  # Fetch achievements for the current user
+    user_achievements = (
+        current_user.get_user_achievements()
+    )  # Fetch achievements for the current user
 
     if request.method == "GET":
         # Pass achievements and logs to the template
@@ -282,7 +285,6 @@ def delete_log_exercise(log_id, exercise_id):
 @login_required
 def delete_exercise_log(log_id):
     ExerciseLog.delete(log_id)
-
     user_logs = ExerciseLog.get_all(current_user.id)
     user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
     return render_template(
@@ -297,10 +299,8 @@ def delete_exercise_log(log_id):
 def add_exercise_log():
     e = ExerciseLog(current_user.id, datetime.now())
     ExerciseLog.insert(e)
-
     user_logs = ExerciseLog.get_all(current_user.id)
     user_logs.sort(key=lambda ex: ex.timestamp, reverse=True)
-
     return render_template(
         "components/exercise_log_list.html",
         user_logs=user_logs,
@@ -313,7 +313,6 @@ def add_exercise_log():
 def food_log():
     if current_user.role != UserRole.Client:
         return redirect(url_for("base.onboarding"))
-
     logs = FoodLog.get_all(current_user.id)
     logs.sort(key=lambda l: l.timestamp, reverse=True)
     return render_template("client/foodLog.html", logs=logs)
@@ -324,7 +323,6 @@ def food_log():
 def trainer_page(trainer_id):
     t = Trainer.get(trainer_id)
     classes = TrainingClass.get_all_by_trainer(t.id)
-
     return render_template("trainer/trainer_profile.html", trainer=t, classes=classes)
 
 
@@ -332,7 +330,22 @@ def trainer_page(trainer_id):
 @login_required
 def get_exercise_data(exercise_id: int):
     labels, values, exercise = current_user.get_exercise_graph(exercise_id)
-
     result = {"labels": labels, "values": values, "exercise": exercise.title.title()}
-
     return jsonify(result)
+
+
+@client_bp.route("/workout_plans")
+@login_required
+def workout_plans():
+    workout_plans = WorkoutPlan.get_client_workouts(current_user.id)
+    workout_plans.sort(key=lambda c: not c.is_active)
+    return render_template("client/workout_plans.html", workout_plans=workout_plans)
+
+
+@client_bp.route("/toggle-workout-plan-active/<int:plan_id>", methods=["POST"])
+def toggle_workout_plan_active(plan_id):
+    WorkoutPlan.toggle_active(plan_id)
+    return render_template(
+        "partials/workout_plan_active_button.html",
+        workout_plan=WorkoutPlan.get(plan_id),
+    )

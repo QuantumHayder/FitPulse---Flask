@@ -1,0 +1,52 @@
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ workout_plan.name }}</h1>
+                    <p class="text-gray-600 mt-2">{{ workout_plan.description }}</p>
+                </div>
+                <div class="flex flex-col items-end">
+                    {% include "partials/workout_plan_active_button.html" %}
+                </div>
+            </div>
+            
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-500">Trainer</h3>
+                    <p class="mt-1 text-lg font-semibold text-gray-900">{{ trainer.first_name|title }} {{ trainer.last_name|title }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-500">Client</h3>
+                    <p class="mt-1 text-lg font-semibold text-gray-900">{{ client.first_name|title }} {{ client.last_name|title}}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Exercises</h2>
+            
+            {% if exercises %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for exercise in exercises %}
+                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <h3 class="text-lg font-semibold text-gray-900">{{ exercise.title }}</h3>
+                    <p class="text-gray-600 text-sm mt-2">{{ exercise.description }}</p>
+                    
+                    <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                        {% if exercise.reps %}
+                        <div>
+                            <span class="text-gray-500">Reps:</span>
+                            <span class="font-medium">{{ exercise.reps }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-500">No exercises have been added to this workout plan yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
