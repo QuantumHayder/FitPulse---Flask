@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %} FitPulse | Trainer Dashboard {% endblock title %}
+
+{% block body %}
+<h2 class="text-3xl font-bold mb-6 text-center text-indigo-600">Trainer Dashboard</h2>
+
+<!-- Dashboard Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Left Section: My Class Count -->
+    <section class="mb-3"> <!-- Reduced margin-bottom -->
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Statistics</h2>
+        <div class="flex space-x-6">  <!-- Use flex and space between items -->
+            <!-- Total Classes Card -->
+            <div class="bg-indigo-600 text-white shadow rounded-lg p-6 w-1/2 text-center">
+                <p class="text-sm font-medium text-indigo-100">Total Classes Count</p>
+                <p class="mt-1 text-3xl font-semibold text-indigo-100">{{ class_count }}</p>
+            </div>
+        
+            <!-- Total Clients Count Card -->
+            <div class="bg-indigo-600 text-white shadow rounded-lg p-6 w-1/2 text-center">
+                <h3 class="text-xl font-semibold text-indigo-100 mb-2">Total Clients Count</h3>
+                <p class="text-3xl font-semibold text-indigo-100">{{ client_count }}</p>
+            </div>
+        </div>        
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Workout Requests Status</h2> <!-- Reduced margin-bottom -->
+            <div class=" rounded-lg px-4 py-3 w-full flex justify-between">
+                <!-- Accepted Requests -->
+                <!-- Total Classes Card -->
+                <div class="bg-indigo-600 text-white shadow rounded-lg p-6 text-center">
+                    <p class="text-sm font-medium">Accepted Requets</p>
+                    <p class="mt-1 text-3xl font-semibold text-green-400">{{ accepted }}</p>
+                </div>
+                <!-- Rejected Requests -->
+                <div class="bg-indigo-600 text-white shadow rounded-lg p-6 text-center">
+                    <p class="text-sm font-medium">Rejected Requets</p>
+                    <p class="mt-1 text-3xl font-semibold text-red-400">{{ rejected }}</p>
+                </div>
+                
+                <!-- Pending Requests -->
+                <div class="bg-indigo-600 text-white shadow rounded-lg p-6 text-center">
+                    <p class="text-sm font-medium">Pending Requets</p>
+                    <p class="mt-1 text-3xl font-semibold">{{ pending }}</p>
+                </div>
+            </div>
+        </section>   
+    </section>
+
+    <!-- Right Section: Best and Worst Classes -->
+    <section class="mb-3"> <!-- Reduced margin-bottom -->
+        <h2 class="text-3xl font-bold mb-3 text-gray-800">Best and Worst Classes</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Best Class -->
+            <!-- Best Class Card -->
+            <div class="bg-indigo-600 text-white shadow rounded-lg p-6">
+                <h3 class="text-xl font-semibold mb-2">Best Class</h3>
+                {% if best_class %}
+                    <p class="text-sm text-gray-300 mb-1">Title: <strong>{{ best_class.title }}</strong></p>
+                    <p class="text-sm text-gray-300 mb-1">Date: {{ best_class.date }}</p>
+                    <p class="text-sm text-gray-300 mb-1">Time: {{ best_class.time }}</p>
+                    <p class="text-sm text-gray-300 mb-1">Duration: {{ best_class.duration }} minutes</p>
+                    <p class="text-sm text-gray-300 mb-1">Cost: ${{ best_class.cost }}</p>
+                    <p class="text-lg font-medium text-green-400 mt-3">
+                        Total Students: {{ best_class.student_count }}
+                    </p>
+                {% else %}
+                    <p class="text-sm text-gray-300">No best class available.</p>
+                {% endif %}
+            </div>
+            <!-- Worst Class -->
+            <!-- Worst Class Card -->
+            <div class="bg-indigo-600 text-white shadow rounded-lg p-6">
+                <h3 class="text-xl font-semibold mb-2">Worst Class</h3>
+                {% if worst_class %}
+                    <p class="text-sm text-gray-300 mb-1">Title: <strong>{{ worst_class.title }}</strong></p>
+                    <p class="text-sm text-gray-300 mb-1">Date: {{ worst_class.date }}</p>
+                    <p class="text-sm text-gray-300 mb-1">Time: {{ worst_class.time }}</p>
+                    <p class="text-sm text-gray-300 mb-1">Duration: {{ worst_class.duration }} minutes</p>
+                    <p class="text-sm text-gray-300 mb-1">Cost: ${{ worst_class.cost }}</p>
+                    <p class="text-lg font-medium text-red-400 mt-3">
+                        Total Students: {{ worst_class.student_count }}
+                    </p>
+                {% else %}
+                    <p class="text-sm text-gray-300">No worst class available.</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </section>
+</div>
+<h2 class="text-3xl font-bold mb-3 text-center text-gray-800">Profit Per Training Class</h2>
+<section class="space-y-6"> <!-- Section to display the cards with space between them -->
+    {% for class_title, profit in class_profit %}
+        <div class="flex justify-between bg-indigo-600 text-white shadow-lg rounded-xl p-6 w-full"> <!-- Card with rounded and full-width -->
+            
+            <!-- Left Column: Class Title -->
+            <div class="flex-1 text-center">
+                <p class="text-lg font-semibold">{{ class_title }}</p> <!-- Class title in the center of the left column -->
+            </div>
+
+            <!-- Right Column: Profit -->
+            <div class="flex-1 text-center">
+                <p class="text-3xl font-semibold">{{ profit }}</p> <!-- Profit value in the center of the right column -->
+            </div>
+
+        </div>
+    {% endfor %}
+</section>
+
+
+{% endblock body %}

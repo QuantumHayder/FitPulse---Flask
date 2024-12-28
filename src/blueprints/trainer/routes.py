@@ -147,3 +147,39 @@ def profile():
         return redirect(url_for("base.onboarding"))
     classes = TrainingClass.get_all_by_trainer(current_user.id)
     return render_template("trainer/profile.html", classes=classes)
+
+@trainer_bp.route("/Dashboard")
+@login_required
+def Dashboard():
+    if current_user.role == UserRole.User:
+        return redirect(url_for("base.onboarding")) 
+    class_count= current_user.count_my_classes()
+    best_class = current_user.best_class()
+    if best_class:
+        # Invoke student_count and add it as an attribute
+        best_class.student_count = best_class.student_count()
+
+    worst_class = current_user.worst_class()
+    if worst_class:
+        # Invoke student_count and add it as an attribute
+        worst_class.student_count = worst_class.student_count()
+        
+    request_counts = current_user.get_my_request_counts()  # Add parentheses to call the method
+    accepted = request_counts["Accepted"]
+    rejected = request_counts["Rejected"]
+    pending = request_counts["Pending"]
+
+    client_count = current_user.count_my_clients()
+    
+    class_profit = current_user.profit_per_class()
+    
+    return render_template("trainer/dashboard.html",
+    class_count=class_count,
+    best_class=best_class,
+    worst_class=worst_class,
+    accepted=accepted,
+    rejected=rejected,
+    pending=pending,
+    client_count=client_count,
+    class_profit=class_profit
+    )
