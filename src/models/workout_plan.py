@@ -94,8 +94,8 @@ class WorkoutPlan:
         if client is None:
             raise ValueError("Cannot assign workout plan to non existing client.")
 
-        db.execute_query(
-            'INSERT INTO public."WorkoutPlan" ("trainer", "client", "is_active", "name", "description") VALUES (%s, %s,%s, %s, %s)',
+        return db.fetch_query(
+            'INSERT INTO public."WorkoutPlan" ("trainer", "client", "is_active", "name", "description") VALUES (%s, %s,%s, %s, %s) RETURNING id',
             (
                 workout.trainer,
                 workout.client,
@@ -103,7 +103,7 @@ class WorkoutPlan:
                 workout.name,
                 workout.description,
             ),
-        )
+        )[0][0]
 
     @classmethod
     def delete(cls, id: int) -> None:

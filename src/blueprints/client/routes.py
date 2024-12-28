@@ -163,6 +163,7 @@ def workout_plan_request():
 
 
 @client_bp.route("/dashboard")
+@login_required
 def dashboard():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
@@ -244,6 +245,7 @@ def update_log_reps(log_id, exercise_id):
 
 
 @client_bp.route("/add-log-exercise/<int:log_id>", methods=["POST"])
+@login_required
 def add_log_exercise(log_id):
     exercise_id = request.form.get("exercise")
     try:
@@ -322,6 +324,7 @@ def trainer_page(trainer_id):
 
 
 @client_bp.route("/get_exercise_data/<int:exercise_id>")
+@login_required
 def get_exercise_data(exercise_id: int):
     labels, values, exercise = current_user.get_exercise_graph(exercise_id)
 

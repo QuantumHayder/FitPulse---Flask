@@ -65,13 +65,13 @@ def view_plan_requests():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    pending_requests=current_user.get_pending_requests_by_trainer()
-    
-    return render_template("trainer/view-plan-requests.html",clients_request = pending_requests , exercises=Exercise.get_all())
+    pending_requests = current_user.get_pending_requests_by_trainer()
 
-
-
-
+    return render_template(
+        "trainer/view-plan-requests.html",
+        clients_request=pending_requests,
+        exercises=Exercise.get_all(),
+    )
 
 
 @trainer_bp.route("/view-old-plan-requests", methods=["GET", "POST"])
@@ -80,44 +80,69 @@ def view_old_plan_requests():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
-    all_requests=WorkoutRequest.get_requests_by_trainer(current_user.id)
-    return render_template("trainer/view-old-plan-requests.html", all_requests=all_requests)
-
-
-
-@trainer_bp.route("/accept-plan-request/<int:plan_id>/", methods=["POST"])
-@login_required
-def accept_plan_request(plan_id):
-    if not htmx:
-        return Response("Bad Request", status=201)
-
-    plan = WorkoutRequest.get(plan_id)
-    if plan is None:
-        return
-
-    current_user.accept_plan_request(plan_id)
+    all_requests = WorkoutRequest.get_requests_by_trainer(current_user.id)
     return render_template(
-        "trainer/accept_plan_requests.html",
-        accepted=True,
-        exercises=Exercise.get_all()
-
+        "trainer/view-old-plan-requests.html", all_requests=all_requests
     )
 
 
-@trainer_bp.route("/reject-plan-request/<int:plan_id>", methods=["POST"])
+@trainer_bp.route(
+    "/accept-plan-request/<int:workout_request_id>/<int:client_id>", methods=["POST"]
+)
 @login_required
-def reject_plan_request(plan_id):
+def accept_plan_request(workout_request_id, client_id):
     if not htmx:
         return Response("Bad Request", status=201)
 
-    plan = WorkoutRequest.get(plan_id)
-    if plan is None:
+    plan_request = WorkoutRequest.get(workout_request_id)
+    if plan_request is None:
         return
 
-    current_user.reject_plan_request(plan_id)
+    title = request.form.get("title")
+    description = request.form.get("description")
+    exercises = request.form.getlist("exercises")
+
+    if not all((title, description, exercises)):
+        return "ERROR"
+
+    current_user.accept_plan_request(workout_request_id)
+
+    new_plan = WorkoutPlan(
+        trainer=current_user.id,
+        client=client_id,
+        is_active=True,
+        name=title,
+        description=description,
+    )
+    new_plan.id = WorkoutPlan.insert(new_plan)
+
+    for exercise in exercises:
+        new_plan.add_exercise(exercise)
+
+    pending_requests = current_user.get_pending_requests_by_trainer()
+
     return render_template(
-        "trainer/accept_plan_requests.html",
-        accepted=False,
+        "partials/workout-requests-table.html",
+        client_requests=pending_requests,
+    )
+
+
+@trainer_bp.route("/reject-plan-request/<int:workout_request_id>", methods=["POST"])
+@login_required
+def reject_plan_request(workout_request_id):
+    if not htmx:
+        return Response("Bad Request", status=201)
+
+    plan_request = WorkoutRequest.get(workout_request_id)
+    if plan_request is None:
+        return
+
+    current_user.reject_plan_request(workout_request_id)
+
+    pending_requests = current_user.get_pending_requests_by_trainer()
+    return render_template(
+        "partials/workout-requests-table.html",
+        client_requests=pending_requests,
     )
 
 
@@ -126,13 +151,4 @@ def reject_plan_request(plan_id):
 def profile():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
-    trainer_info = Trainer.get(current_user.id)
-    return render_template("trainer/profile.html", trainer_info=trainer_info)
-
-@trainer_bp.route("/create-workout", methods=["POST"])
-def create_workout():
-    trainer=current_user.id
-    
-
-
-    
+    return render_template("trainer/profile.html")
