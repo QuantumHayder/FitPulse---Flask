@@ -168,7 +168,7 @@ def Dashboard():
     if worst_class:
         worst_class.student_count = worst_class.student_count()
 
-    request_counts = current_user.get_my_request_counts()  # Add parentheses to call the method
+    request_counts = current_user.get_my_request_counts()  
     accepted = request_counts["Accepted"]
     rejected = request_counts["Rejected"]
     pending = request_counts["Pending"]
@@ -177,8 +177,8 @@ def Dashboard():
     
     class_profit = current_user.profit_per_class()
 
-    # Generate the bar plot
-    if class_profit:  # Only generate if there is profit data
+    
+    if class_profit:  
         fig, ax = plt.subplots(figsize=(10, 6))
         class_titles = [item[0] for item in class_profit]
         profits = [item[1] for item in class_profit]
@@ -191,19 +191,15 @@ def Dashboard():
         ax.set_title('Profit per Class')
         plt.xticks(rotation=45, ha='right')
 
-        # Ensure the 'static' folder exists
         static_folder = os.path.join(current_app.root_path, 'static')
         if not os.path.exists(static_folder):
             os.makedirs(static_folder)
 
-        # Save the plot to a file
         plot_image_path = os.path.join(static_folder, 'class_profit_plot.png')
 
-        # Save the image as a PNG file
         plt.tight_layout()
         plt.savefig(plot_image_path)
 
-        # Close the plot to release memory
         plt.close(fig)
 
     return render_template("trainer/dashboard.html",

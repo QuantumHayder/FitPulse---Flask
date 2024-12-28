@@ -41,7 +41,7 @@ class Trainer(BaseUser):
         best_class = None
 
         for training_class in classes:
-            count = training_class.student_count()  # Call student_count() on the class instance
+            count = training_class.student_count()  
             if count > max_count:
                 max_count = count
                 best_class = training_class
@@ -56,7 +56,7 @@ class Trainer(BaseUser):
         worst_class = None
 
         for training_class in classes:
-            count = training_class.student_count()  # Call student_count() on the class instance
+            count = training_class.student_count()  
             if count < least_count:
                 least_count = count
                 worst_class = training_class
@@ -67,7 +67,7 @@ class Trainer(BaseUser):
         from .workout_request import WorkoutRequest
         requests = WorkoutRequest.get_requests_by_trainer(self.id)
 
-        # Categorize requests based on their status and count them
+        
         accepted_count = sum(1 for request in requests if request.status == "Accepted")
         rejected_count = sum(1 for request in requests if request.status == "Rejected")
         pending_count = sum(1 for request in requests if request.status == "Pending")
