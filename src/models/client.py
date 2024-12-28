@@ -7,6 +7,7 @@ from .friend_request import FriendRequest
 from src.models import db
 
 from .training_class import TrainingClass
+from .exercise import Exercise
 from . import db
 
 
@@ -31,6 +32,20 @@ class Client(BaseUser):
     def get_all(cls):
         classes = db.fetch_query('SELECT * FROM public."Client";')
         return [cls(**training_class) for training_class in classes]
+
+    def get_exercise_graph(self, exercise_id: int):
+        counts = db.fetch_query(
+            """SELECT timestamp, reps FROM public."ExerciseLog" as elog, public."LogExerciseMap" as emap 
+                WHERE elog.client = %s AND emap.log = elog.id 
+                AND emap.exercise = %s 
+                ORDER BY timestamp 
+                ASC;""",
+            (self.id, exercise_id),
+        )
+
+        labels = [count[0] for count in counts]
+        value = [count[1] for count in counts]
+        return labels, value, Exercise.get(exercise_id)
 
     def update_points(self, points: int):
         db.execute_query(
@@ -68,23 +83,18 @@ class Client(BaseUser):
         clients = cls.get_all()
 
         if not clients:
-            return None, None  # Return None if no clients are found
+            return None, None
 
-        # Create a dictionary to store the number of friends for each client
         friends_count = {}
 
         for client in clients:
-            # Get the list of friends for each client
             friends = client.get_friends()
             friends_count[client] = len(friends)
 
-        # Find the client with the most friends
         top_client = max(friends_count, key=friends_count.get, default=None)
 
-        # Find the client with the fewest friends
         bottom_client = min(friends_count, key=friends_count.get, default=None)
 
-        # Return the top and bottom clients along with their friend counts
         return (top_client, friends_count[top_client]) if top_client else None, (
             (bottom_client, friends_count[bottom_client]) if bottom_client else None
         )
@@ -131,7 +141,6 @@ class Client(BaseUser):
         if self.id == other.id:
             raise ValueError("You cannot send a friend request to yourself.")
 
-        # Check if a friend request doesn't already exist
         you_sent_request = FriendRequest.get(sender=self.id, receiver=other.id)
 
         if you_sent_request:
@@ -146,43 +155,34 @@ class Client(BaseUser):
         FriendRequest.insert(
             FriendRequest(receiver=other.id, sender=self.id, status=Status.Pending)
         )
-        
+
     def enrolled_classes(self):
-        # Query to get all training class ids the client is enrolled in
         k = db.fetch_query(
-            '''
+            """
             SELECT "TrainingClass".id
             FROM public."ClientTrainingClassMap"
             JOIN public."TrainingClass" 
             ON "ClientTrainingClassMap".training_class = "TrainingClass".id
             WHERE "ClientTrainingClassMap".client = %s;
-            ''',
-            (self.id,)
+            """,
+            (self.id,),
         )
 
-        # If no classes are found, return an empty list
         if not k:
             return []
 
-        # List to hold the enrolled classes with their trainers
         enrolled_classes = []
 
-        # Loop through the list of class ids and fetch each class and its trainer
         for class_item in k:
             class_id = class_item[0]
-            
-            # Call the get function for the class to fetch both class and trainer objects
+
             training_class, trainer = TrainingClass.get(class_id)
 
-            # Append the class and trainer objects to the enrolled_classes list
-            enrolled_classes.append({
-                "training_class": training_class,
-                "trainer": trainer
-            })
+            enrolled_classes.append(
+                {"training_class": training_class, "trainer": trainer}
+            )
 
         return enrolled_classes
-
-
 
     def is_enrolled_in_class(self, class_id: int) -> bool:
         k = db.fetch_query(
