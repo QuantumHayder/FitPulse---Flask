@@ -205,6 +205,69 @@ class Client(BaseUser):
             )
         except Exception:
             raise ValueError("Already enrolled in the class")
+        
+    def get_exercise_logs(self):
+        # Fetch logs specific to the current user (self.client_id)
+        query = 'SELECT * FROM public."ExerciseLog" WHERE client = %s;'  # Query with placeholder
+        logs = db.fetch_query(query, (self.id,))  # Pass parameters as tuple
+        return logs 
+        
+    def process_user_achievements(self):
+        # Fetch logs for the current user
+        logs = self.get_exercise_logs()
+        
+        # Fetch exercises with their total reps for the current user
+        total_reps_by_exercise = {}
+        for log in logs:
+            # Fetch associated exercises and reps from logExerciseMap using the log's id
+            query = f'SELECT exercise, SUM(reps) as total_reps FROM public."LogExerciseMap" WHERE log = {log["id"]} GROUP BY exercise;'
+            exercises = db.fetch_query(query)
+            for exercise in exercises:
+                exercise_id = exercise["exercise"]
+                total_reps = exercise["total_reps"]
+                if exercise_id not in total_reps_by_exercise:
+                    total_reps_by_exercise[exercise_id] = 0
+                total_reps_by_exercise[exercise_id] += total_reps
+
+        # Fetch all achievements
+        achievements = db.fetch_query('SELECT * FROM public."Achievement";')
+        
+        # Map achievements for the user
+        for achievement in achievements:
+            achievement_id = achievement["id"]
+            exercise_id = achievement["exercise"]
+            required_reps = achievement["reps"]
+            achievement_points = achievement["points"]  # Get points for the achievement
+            
+            # Check if the user qualifies for the achievement
+            if (
+                exercise_id in total_reps_by_exercise
+                and total_reps_by_exercise[exercise_id] >= required_reps
+            ):
+                # Check if the client already has this achievement
+                query = f'SELECT * FROM public."ClientAchievementMap" WHERE client = {self.id} AND achievement = {achievement_id};'
+                existing_mapping = db.fetch_query(query)
+                
+                # Add achievement if not already present
+                if not existing_mapping:
+                    insert_query = f'INSERT INTO public."ClientAchievementMap" (client, achievement) VALUES ({self.id}, {achievement_id});'
+                    db.execute_query(insert_query)
+                    update_points_query = f'UPDATE public."Client" SET points = points + {achievement_points} WHERE id = {self.id};'
+                    db.execute_query(update_points_query)
+    
+    def get_user_achievements(self):
+        # Query to fetch all achievement details achieved by the user
+        query = f'''
+            SELECT *
+            FROM public."ClientAchievementMap"
+            JOIN public."Achievement" 
+            ON public."ClientAchievementMap".achievement = public."Achievement".id
+            WHERE public."ClientAchievementMap".client = {self.id};
+        '''
+        achievements = db.fetch_query(query)
+        return achievements
+
+
 
     def __str__(self):
         return f"Client(id={self.id}, first_name={self.first_name}, last_name={self.last_name}, email={self.email}, points={self.points})"
