@@ -94,9 +94,9 @@
                     <dd class="mt-1 text-3xl font-semibold text-violet-600">
                         {% if entity is not none %}
                             {% if label.endswith("Trainer") %}
-                                {{ entity.first_name }} {{ entity.last_name }}
+                                {{ entity.first_name|title }} {{ entity.last_name|title }}
                             {% elif label.endswith("Class") %}
-                                {{ entity.title }}{{ " - " + entity.description if entity.description else "" }}
+                                {{ entity.title|title }}{{ " - " + entity.description if entity.description else "" }}
                             {% endif %}
                         {% else %}
                             No Data Available
