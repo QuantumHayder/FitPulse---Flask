@@ -21,19 +21,4 @@
                 "id": button_id
             }
         ) }}
-{% else %}
-        {% set message_id = "#message-c-" + training_class.id|string %}
-        {% set button_id = "button-c-" + training_class.id|string %}
-
-        {{ primary_button(
-            text='Enroll Now',
-            attrs={
-                "id": button_id,
-                "hx-get": url_for('client.enroll_class', class_id=training_class.id),
-                "hx-target": message_id,
-                "hx-trigger": "click",
-                "hx-swap": "innerHTML"
-            },
-            classes='w-full py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition cursor-pointer'
-        ) }}
 {% endif %}
