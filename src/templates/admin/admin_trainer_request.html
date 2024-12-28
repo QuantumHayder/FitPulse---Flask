@@ -104,14 +104,16 @@
 {% endif %}
 
 
-<dd hx-swap-oob="true" id="pending-count" class="mt-1 text-3xl font-semibold text-yellow-600">
-    {{ pending_requests|length }}
-</dd>
+{% if htmx %}
+    <dd hx-swap-oob="true" id="pending-count" class="mt-1 text-3xl font-semibold text-yellow-600">
+        {{ pending_requests|length }}
+    </dd>
 
-<dd hx-swap-oob="true" id="rejected-count" class="mt-1 text-3xl font-semibold text-red-600">
-    {{ rejected_requests|length }}
-</dd>
+    <dd hx-swap-oob="true" id="rejected-count" class="mt-1 text-3xl font-semibold text-red-600">
+        {{ rejected_requests|length }}
+    </dd>
 
-<dd hx-swap-oob="true" id="total-count" class="mt-1 text-3xl font-semibold text-gray-900">
-    {{ trainer_requests|length }}
-</dd>
+    <dd hx-swap-oob="true" id="total-count" class="mt-1 text-3xl font-semibold text-gray-900">
+        {{ trainer_requests|length }}
+    </dd>
+{% endif %}
