@@ -33,7 +33,7 @@ def create_class():
         duration = request.form.get("duration")
         cost = request.form.get("cost")
 
-        if not all(title, description, date, time, duration, cost):
+        if not all((title, description, date, time, duration, cost)):
             return '<div class="text-red-500">All fields are required!</div>', 200
 
         TrainingClass.insert(
