@@ -226,6 +226,8 @@ def create_promotion(class_id: int):
 @admin_bp.route("/admin-dashboard")
 @login_required
 def dashboard():
+    if current_user.role != UserRole.Admin:
+        return Response("Bad Request", 400)
 
     adminCount = Admin.count_all()
     trainerCount = Trainer.count_all()

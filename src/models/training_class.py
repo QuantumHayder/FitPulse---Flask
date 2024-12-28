@@ -7,7 +7,7 @@ import src.models.promotion as promotion
 
 
 class TrainingClass:
-    def __init__(  # Keep order or __init__ consistent with the database
+    def __init__(
         self,
         trainer: int,
         date: date,
@@ -49,7 +49,6 @@ class TrainingClass:
             return 0
 
         return classes[0]["count"]
-    
 
     @classmethod
     def get(cls, id: int):
@@ -99,16 +98,22 @@ class TrainingClass:
         GROUP BY training_class 
         ORDER BY client_count DESC;
         """
-        
+
         result = db.fetch_query(query)
         if not result:
-            return None,None,None,None
+            return None, None, None, None
         best_class_id = result[0][0]
         worst_class_id = result[-1][0]
-        #-1,0
-        best_training_class,best_trainer = TrainingClass.get(best_class_id)  or (None, None)
-        worst_training_class,worst_trainer = TrainingClass.get(worst_class_id)  or (None, None)
-        
+        # -1,0
+        best_training_class, best_trainer = TrainingClass.get(best_class_id) or (
+            None,
+            None,
+        )
+        worst_training_class, worst_trainer = TrainingClass.get(worst_class_id) or (
+            None,
+            None,
+        )
+
         if best_training_class and worst_training_class:
             return (
                 best_training_class,
@@ -117,11 +122,19 @@ class TrainingClass:
                 worst_trainer,
             )
         else:
-           best_training_class, best_trainer, worst_training_class, worst_trainer = None, None, None, None
-           return best_training_class, best_trainer, worst_training_class, worst_trainer
-           
+            best_training_class, best_trainer, worst_training_class, worst_trainer = (
+                None,
+                None,
+                None,
+                None,
+            )
+            return (
+                best_training_class,
+                best_trainer,
+                worst_training_class,
+                worst_trainer,
+            )
 
-    
     @classmethod
     def insert(cls, training_class: Self) -> None:
         if training_class.title is None:

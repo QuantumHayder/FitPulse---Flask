@@ -72,9 +72,15 @@ def trainer_request():
 
 @base_bp.route("/")
 def home():
-    if current_user.is_authenticated and current_user.role == UserRole.User:
-        return redirect(url_for("base.onboarding"))
-
+    if current_user.is_authenticated:
+        if current_user.role == UserRole.User:
+            return redirect(url_for("base.onboarding"))
+        if current_user.role == UserRole.Admin:
+            return redirect(url_for("admin.dashboard"))
+        if current_user.role == UserRole.Client:
+            return redirect(url_for("client.dashboard"))
+        if current_user.role == UserRole.Trainer:
+            return redirect(url_for("trainer.profile"))
     return render_template("home.html")
 
 

@@ -147,10 +147,17 @@ def update_profile():
     last_name = request.form.get("last_name")
     email = request.form.get("email")
 
-    if not first_name or not last_name or not email:
-        return '<div class="text-red-500">All fields are required!</div>', 200
+    if not any((first_name, last_name, email)):
+        return f"<div class='text-red-500'>Can't leave everthing empty.</div>", 200
 
-    # TODO: make sure email is not already taken in all user tables
+    if email:
+        u = User.get_by_email(email)
+        a = Admin.get_by_email(email)
+        t = Trainer.get_by_email(email)
+        c = Client.get_by_email(email)
+
+        if any((u, a, t, c)):
+            return f"<div class='text-red-500'>Email already taken.</div>", 200
 
     current_user.update(current_user.id, first_name, last_name, email)
 
