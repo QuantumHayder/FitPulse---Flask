@@ -183,11 +183,16 @@ def goals():
     if current_user.role == UserRole.User:
         return redirect(url_for("base.onboarding"))
 
+    # Process and fetch user achievements
+    current_user.process_user_achievements()  # This will update achievements based on the logs
+    user_achievements = current_user.get_user_achievements()  # Fetch achievements for the current user
+
     if request.method == "GET":
-        return render_template("client/goals.html")
+        # Pass achievements and logs to the template
+        return render_template("client/goals.html", achievements=user_achievements)
 
+    # Handle POST request for updating calories
     calories = request.form.get("calories")
-
     if not calories:
         return '<div class="text-red-500 text-center my-1">Enter calories!</div>', 200
 
