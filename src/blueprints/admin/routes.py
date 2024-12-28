@@ -100,8 +100,8 @@ def reject_trainer_request(request_id):
 
     trainer_requests = TrainerRequest.get_all()
 
-    accepted_requests = list(
-        filter(lambda r: r[0].status == Status.Accepted, trainer_requests)
+    rejected_requests = list(
+        filter(lambda r: r[0].status == Status.Rejected, trainer_requests)
     )
 
     pending_requests = list(
@@ -111,7 +111,7 @@ def reject_trainer_request(request_id):
     return render_template(
         "admin/admin_trainer_request.html",
         trainer_requests=trainer_requests,
-        accepted_requests=accepted_requests,
+        rejected_requests=rejected_requests,
         pending_requests=pending_requests,
     )
 
