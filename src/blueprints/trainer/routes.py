@@ -9,6 +9,11 @@ from flask import (
 from flask_login import login_required, current_user
 from flask_htmx import HTMX
 
+import os
+import matplotlib.pyplot as plt
+from io import BytesIO
+from flask import send_file, current_app
+
 from src.models.exercise import Exercise
 from src.models.base_user import UserRole
 from src.models.workout_plan import WorkoutPlan
@@ -152,18 +157,17 @@ def profile():
 @login_required
 def Dashboard():
     if current_user.role == UserRole.User:
-        return redirect(url_for("base.onboarding")) 
-    class_count= current_user.count_my_classes()
+        return redirect(url_for("base.onboarding"))
+
+    class_count = current_user.count_my_classes()
     best_class = current_user.best_class()
     if best_class:
-        # Invoke student_count and add it as an attribute
         best_class.student_count = best_class.student_count()
 
     worst_class = current_user.worst_class()
     if worst_class:
-        # Invoke student_count and add it as an attribute
         worst_class.student_count = worst_class.student_count()
-        
+
     request_counts = current_user.get_my_request_counts()  # Add parentheses to call the method
     accepted = request_counts["Accepted"]
     rejected = request_counts["Rejected"]
@@ -172,14 +176,43 @@ def Dashboard():
     client_count = current_user.count_my_clients()
     
     class_profit = current_user.profit_per_class()
-    
+
+    # Generate the bar plot
+    if class_profit:  # Only generate if there is profit data
+        fig, ax = plt.subplots(figsize=(10, 6))
+        class_titles = [item[0] for item in class_profit]
+        profits = [item[1] for item in class_profit]
+        
+        bar_width = 0.1
+        ax.bar(class_titles, profits, color='skyblue' , width=bar_width)
+        
+        ax.set_xlabel('Class Title')
+        ax.set_ylabel('Profit')
+        ax.set_title('Profit per Class')
+        plt.xticks(rotation=45, ha='right')
+
+        # Ensure the 'static' folder exists
+        static_folder = os.path.join(current_app.root_path, 'static')
+        if not os.path.exists(static_folder):
+            os.makedirs(static_folder)
+
+        # Save the plot to a file
+        plot_image_path = os.path.join(static_folder, 'class_profit_plot.png')
+
+        # Save the image as a PNG file
+        plt.tight_layout()
+        plt.savefig(plot_image_path)
+
+        # Close the plot to release memory
+        plt.close(fig)
+
     return render_template("trainer/dashboard.html",
-    class_count=class_count,
-    best_class=best_class,
-    worst_class=worst_class,
-    accepted=accepted,
-    rejected=rejected,
-    pending=pending,
-    client_count=client_count,
-    class_profit=class_profit
-    )
+                           class_count=class_count,
+                           best_class=best_class,
+                           worst_class=worst_class,
+                           accepted=accepted,
+                           rejected=rejected,
+                           pending=pending,
+                           client_count=client_count,
+                           class_profit=class_profit,
+                           plot_image_path='class_profit_plot.png') 

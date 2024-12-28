@@ -107,6 +107,9 @@
         </div>
     {% endfor %}
 </section>
+{% if plot_image_path %}
+    <img src="{{ url_for('static', filename='class_profit_plot.png') }}" alt="Class Profit Bar Graph">
+{% endif %}
 
 
 {% endblock body %}
