@@ -1,4 +1,9 @@
-templates/* linguist-detectable=false
-statics/* linguist-detectable=false
-themes/* linguist-detectable=false
+# Ignore all HTML files (including nested ones) from language stats
+*.html linguist-detectable=false
+
+# Ignore static assets
+statics/** linguist-detectable=false
+themes/** linguist-detectable=false
+
+# Emphasize Python
 *.py linguist-detectable=true
